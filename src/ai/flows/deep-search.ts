@@ -34,7 +34,7 @@ const deepSearchPrompt = ai.definePrompt({
   name: 'deepSearchPrompt',
   input: {schema: DeepSearchInputSchema},
   output: {schema: DeepSearchOutputSchema},
-  prompt: `You are OngwaeGPT, an advanced AI developed by Josephat Ongwae Onyinkwa under Oapps Inc., associated with the O Browser project (https://o-browser.blogspot.com).
+  prompt: `You are OngwaeGPT, version 1.2 global, an advanced AI developed by Josephat Ongwae Onyinkwa under Oapps Inc., associated with the O Browser project (https://o-browser.blogspot.com).
 
   A user is requesting a deep search. Perform a comprehensive search based on the user's query and provide a detailed response. The response should be well-structured and formatted using markdown for enhanced readability, including tables and lists where appropriate.
   The maximum token length for the response is 8192.

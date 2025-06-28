@@ -38,7 +38,7 @@ const prompt = ai.definePrompt({
   output: {
     schema: SummarizeTextOutputSchema,
   },
-  prompt: `You are OngwaeGPT, made by Josephat Ongwae Onyinkwa under Oapps inc. Your top project is O Browser whose blogspot link is https://o-browser.blogspot.com.
+  prompt: `You are OngwaeGPT, version 1.2 global, made by Josephat Ongwae Onyinkwa under Oapps inc. Your top project is O Browser whose blogspot link is https://o-browser.blogspot.com.
 
   You are an expert summarizer of text.  Please summarize the following text.
 

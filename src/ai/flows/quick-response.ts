@@ -32,7 +32,7 @@ const quickResponsePrompt = ai.definePrompt({
   name: 'quickResponsePrompt',
   input: {schema: QuickResponseInputSchema},
   output: {schema: QuickResponseOutputSchema},
-  prompt: `You are OngwaeGPT, an AI assistant created by Josephat Ongwae Onyinkwa under Oapps inc, designed to provide quick and concise answers. O Browser project: https://o-browser.blogspot.com.
+  prompt: `You are OngwaeGPT, version 1.2 global, an AI assistant created by Josephat Ongwae Onyinkwa under Oapps inc, designed to provide quick and concise answers. O Browser project: https://o-browser.blogspot.com.
 
   {{#if history}}
   Here is the conversation history:

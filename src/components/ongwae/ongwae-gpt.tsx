@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ArrowUp, Bot, Loader, User, Zap } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { ArrowUp, Bot, Loader, Trash, User, Zap } from "lucide-react";
 import { ChatMessage } from "./chat-message";
 import type { Message } from "@/lib/types";
 import { deepSearch } from "@/ai/flows/deep-search";
@@ -16,12 +17,20 @@ import { useToast } from "@/hooks/use-toast";
 
 const IMAGE_KEYWORDS = ["generate image", "create image", "draw", "sketch", "picture of"];
 const TYPING_SPEED_MS = 15;
+const INITIAL_MESSAGE = {
+  id: "1",
+  role: "assistant" as const,
+  content: "Hello! I am **OngwaeGPT v1.2 global**, an AI assistant created by Josephat Ongwae Onyinkwa. I can generate text, images, tables, and code. How can I assist you today?",
+  isStreaming: false,
+};
+
 
 export function OngwaeGpt() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDeepSearch, setIsDeepSearch] = useState(false);
+  const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -32,26 +41,10 @@ export function OngwaeGpt() {
       if (parsedMessages && Array.isArray(parsedMessages) && parsedMessages.length > 0) {
         setMessages(parsedMessages);
       } else {
-        setMessages([
-          {
-            id: "1",
-            role: "assistant",
-            content:
-              "Hello! I am **OngwaeGPT**, an AI assistant created by Josephat Ongwae Onyinkwa. I can generate text, images, tables, and code. How can I assist you today?",
-            isStreaming: false,
-          },
-        ]);
+        setMessages([INITIAL_MESSAGE]);
       }
     } catch (error) {
-       setMessages([
-          {
-            id: "1",
-            role: "assistant",
-            content:
-              "Hello! I am **OngwaeGPT**, an AI assistant created by Josephat Ongwae Onyinkwa. I can generate text, images, tables, and code. How can I assist you today?",
-            isStreaming: false,
-          },
-        ]);
+       setMessages([INITIAL_MESSAGE]);
     }
   }, []);
 
@@ -68,6 +61,16 @@ export function OngwaeGpt() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const handleClearChat = () => {
+    setMessages([INITIAL_MESSAGE]);
+    localStorage.removeItem("ongwaeGptMessages");
+    setIsClearConfirmOpen(false);
+    toast({
+      title: "Chat Cleared",
+      description: "Your conversation history has been removed.",
+    });
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -162,6 +165,31 @@ export function OngwaeGpt() {
               </p>
             </div>
           </div>
+          <AlertDialog open={isClearConfirmOpen} onOpenChange={setIsClearConfirmOpen}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={() => setIsClearConfirmOpen(true)} disabled={isLoading || messages.length <= 1}>
+                  <Trash className="h-5 w-5" />
+                  <span className="sr-only">Clear Chat</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Clear Chat</p>
+              </TooltipContent>
+            </Tooltip>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete your current chat history. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleClearChat}>Continue</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 pb-32">
