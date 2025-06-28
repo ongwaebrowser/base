@@ -12,6 +12,10 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const DeepSearchInputSchema = z.object({
+  history: z.array(z.object({
+    role: z.enum(['user', 'assistant']),
+    content: z.string(),
+  })).optional().describe('The conversation history.'),
   query: z.string().describe('The search query for a comprehensive and detailed search.'),
 });
 export type DeepSearchInput = z.infer<typeof DeepSearchInputSchema>;
@@ -22,7 +26,8 @@ const DeepSearchOutputSchema = z.object({
 export type DeepSearchOutput = z.infer<typeof DeepSearchOutputSchema>;
 
 export async function deepSearch(input: DeepSearchInput): Promise<DeepSearchOutput> {
-  return deepSearchFlow(input);
+  const { results } = await deepSearchFlow(input);
+  return { results };
 }
 
 const deepSearchPrompt = ai.definePrompt({
@@ -33,6 +38,15 @@ const deepSearchPrompt = ai.definePrompt({
 
   A user is requesting a deep search. Perform a comprehensive search based on the user's query and provide a detailed response. The response should be well-structured and formatted using markdown for enhanced readability, including tables and lists where appropriate.
   The maximum token length for the response is 8192.
+
+  {{#if history}}
+  Here is the conversation history:
+  {{#each history}}
+  **{{role}}**: {{{content}}}
+  {{/each}}
+  {{/if}}
+
+  Based on the conversation history, respond to the following user query.
 
   Query: {{{query}}}
   `,
@@ -47,8 +61,8 @@ const deepSearchFlow = ai.defineFlow(
     inputSchema: DeepSearchInputSchema,
     outputSchema: DeepSearchOutputSchema,
   },
-  async input => {
+  async (input) => {
     const {output} = await deepSearchPrompt(input);
-    return output!;
+    return { results: output!.results };
   }
 );

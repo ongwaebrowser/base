@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'OngwaeGPT: AI Visionary',
+  title: 'OngwaeGPT AI',
   description: 'An advanced AI assistant by Josephat Ongwae Onyinkwa',
 };
 

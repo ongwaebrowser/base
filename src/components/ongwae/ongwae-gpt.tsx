@@ -18,20 +18,48 @@ const IMAGE_KEYWORDS = ["generate image", "create image", "draw", "sketch", "pic
 const TYPING_SPEED_MS = 15;
 
 export function OngwaeGpt() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      role: "assistant",
-      content:
-        "Hello! I am **OngwaeGPT**, the next-generation AI Visionary created by Josephat Ongwae Onyinkwa. I can generate text, images, tables, and code. How can I assist you today?",
-      isStreaming: false,
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDeepSearch, setIsDeepSearch] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    try {
+      const storedMessages = localStorage.getItem("ongwaeGptMessages");
+      const parsedMessages = storedMessages ? JSON.parse(storedMessages) : null;
+      if (parsedMessages && Array.isArray(parsedMessages) && parsedMessages.length > 0) {
+        setMessages(parsedMessages);
+      } else {
+        setMessages([
+          {
+            id: "1",
+            role: "assistant",
+            content:
+              "Hello! I am **OngwaeGPT**, an AI assistant created by Josephat Ongwae Onyinkwa. I can generate text, images, tables, and code. How can I assist you today?",
+            isStreaming: false,
+          },
+        ]);
+      }
+    } catch (error) {
+       setMessages([
+          {
+            id: "1",
+            role: "assistant",
+            content:
+              "Hello! I am **OngwaeGPT**, an AI assistant created by Josephat Ongwae Onyinkwa. I can generate text, images, tables, and code. How can I assist you today?",
+            isStreaming: false,
+          },
+        ]);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem("ongwaeGptMessages", JSON.stringify(messages));
+    }
+  }, [messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -45,8 +73,9 @@ export function OngwaeGpt() {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    const userInput: Message = { id: Date.now().toString(), role: "user", content: input };
-    setMessages((prev) => [...prev, userInput]);
+    const userMessage: Message = { id: Date.now().toString(), role: "user", content: input };
+    const newMessages = [...messages, userMessage]
+    setMessages(newMessages);
     setInput("");
     setIsLoading(true);
 
@@ -64,6 +93,7 @@ export function OngwaeGpt() {
       let responseType: 'text' | 'image' = 'text';
 
       const isImageRequest = IMAGE_KEYWORDS.some(keyword => input.toLowerCase().includes(keyword));
+      const historyForAI = newMessages.slice(0, -1).map(({ role, content }) => ({ role, content }));
 
       if (isImageRequest) {
         const { imageUrl } = await generateImage({ prompt: input });
@@ -77,10 +107,12 @@ export function OngwaeGpt() {
         );
         setIsLoading(false);
       } else {
-        const { response } = isDeepSearch
-          ? await deepSearch({ query: input })
-          : await quickResponse({ query: input });
-        responseContent = response;
+        const aiCall = isDeepSearch
+          ? deepSearch({ history: historyForAI, query: input })
+          : quickResponse({ history: historyForAI, query: input });
+        
+        const result = await aiCall;
+        responseContent = isDeepSearch ? (result as any).results : (result as any).response;
 
         setMessages((prev) =>
           prev.map((msg) =>
@@ -124,7 +156,7 @@ export function OngwaeGpt() {
           <div className="flex items-center gap-3">
             <Bot className="h-8 w-8 text-primary" />
             <div className="flex flex-col">
-              <h1 className="font-headline text-xl font-bold">OngwaeGPT: AI Visionary</h1>
+              <h1 className="font-headline text-xl font-bold">OngwaeGPT AI</h1>
               <p className="text-xs text-muted-foreground">
                 By <a href="https://o-browser.blogspot.com" target="_blank" rel="noopener noreferrer" className="hover:underline">Josephat Ongwae Onyinkwa (Oapps Inc.)</a>
               </p>
@@ -161,7 +193,7 @@ export function OngwaeGpt() {
                 <span className="sr-only">Send</span>
               </Button>
             </form>
-            <div className="mt-2 flex items-center justify-center gap-4">
+            <div className="mt-3 flex flex-col items-center justify-center gap-2">
               <div className="flex items-center space-x-2">
                 <Switch
                   id="deep-search-mode"
@@ -174,6 +206,9 @@ export function OngwaeGpt() {
                   {isDeepSearch ? "Deep Search" : "Quick Response"}
                 </Label>
               </div>
+               <p className="text-center text-xs text-muted-foreground">
+                OngwaeGPT can make mistakes. Double check it!
+              </p>
             </div>
           </div>
         </footer>
