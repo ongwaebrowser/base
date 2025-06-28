@@ -20,7 +20,7 @@ const TYPING_SPEED_MS = 15;
 const INITIAL_MESSAGE = {
   id: "1",
   role: "assistant" as const,
-  content: "Hello! I am **OngwaeGPT v1.2 global**, an AI assistant created by Josephat Ongwae Onyinkwa. I can generate text, images, tables, and code. How can I assist you today?",
+  content: "Hello there, how may I be of help?",
   isStreaming: false,
 };
 
