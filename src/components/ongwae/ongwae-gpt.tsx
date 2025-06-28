@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect, type FormEvent } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,11 +13,9 @@ import { deepSearch } from "@/ai/flows/deep-search";
 import { quickResponse } from "@/ai/flows/quick-response";
 import { generateImage } from "@/ai/flows/generate-image";
 import { useToast } from "@/hooks/use-toast";
-import { Logo } from "./logo";
-import Link from "next/link";
-import { Badge } from "../ui/badge";
 
 const IMAGE_KEYWORDS = ["generate image", "create image", "draw", "sketch", "picture of"];
+const TYPING_SPEED_MS = 15;
 
 export function OngwaeGpt() {
   const [messages, setMessages] = useState<Message[]>([
@@ -27,6 +24,7 @@ export function OngwaeGpt() {
       role: "assistant",
       content:
         "Hello! I am **OngwaeGPT**, the next-generation AI Visionary created by Josephat Ongwae Onyinkwa. I can generate text, images, tables, and code. How can I assist you today?",
+      isStreaming: false,
     },
   ]);
   const [input, setInput] = useState("");
@@ -56,7 +54,7 @@ export function OngwaeGpt() {
     const assistantMessage: Message = {
       id: assistantMessageId,
       role: "assistant",
-      content: "",
+      content: "Thinking...",
       isStreaming: true,
     };
     setMessages((prev) => [...prev, assistantMessage]);
@@ -71,21 +69,35 @@ export function OngwaeGpt() {
         const { imageUrl } = await generateImage({ prompt: input });
         responseContent = imageUrl;
         responseType = 'image';
+        
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMessageId ? { ...msg, content: responseContent, type: responseType, isStreaming: false } : msg
+          )
+        );
+        setIsLoading(false);
       } else {
-        if (isDeepSearch) {
-          const { results } = await deepSearch({ query: input });
-          responseContent = results;
-        } else {
-          const { response } = await quickResponse({ query: input });
-          responseContent = response;
-        }
-      }
+        const { response } = isDeepSearch
+          ? await deepSearch({ query: input })
+          : await quickResponse({ query: input });
+        responseContent = response;
 
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === assistantMessageId ? { ...msg, content: responseContent, type: responseType, isStreaming: false } : msg
-        )
-      );
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMessageId ? { ...msg, content: responseContent, isStreaming: true } : msg
+          )
+        );
+        
+        const typingDuration = responseContent.length * TYPING_SPEED_MS;
+        setTimeout(() => {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId ? { ...msg, isStreaming: false } : msg
+            )
+          );
+          setIsLoading(false);
+        }, typingDuration);
+      }
     } catch (error) {
       console.error("AI Error:", error);
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
@@ -101,7 +113,6 @@ export function OngwaeGpt() {
             : msg
         )
       );
-    } finally {
       setIsLoading(false);
     }
   };
@@ -111,16 +122,13 @@ export function OngwaeGpt() {
       <div className="flex h-screen flex-col bg-background text-foreground">
         <header className="flex items-center justify-between border-b p-4">
           <div className="flex items-center gap-3">
-            <Logo className="h-8 w-8 text-primary" />
+            <Bot className="h-8 w-8 text-primary" />
             <div className="flex flex-col">
               <h1 className="font-headline text-xl font-bold">OngwaeGPT: AI Visionary</h1>
               <p className="text-xs text-muted-foreground">
                 By <a href="https://o-browser.blogspot.com" target="_blank" rel="noopener noreferrer" className="hover:underline">Josephat Ongwae Onyinkwa (Oapps Inc.)</a>
               </p>
             </div>
-          </div>
-          <div>
-            <Badge variant="secondary">O-Browser Project</Badge>
           </div>
         </header>
 
@@ -129,16 +137,6 @@ export function OngwaeGpt() {
             {messages.map((message) => (
               <ChatMessage key={message.id} message={message} />
             ))}
-            {isLoading && messages[messages.length-1].role === 'assistant' && (
-              <ChatMessage
-                message={{
-                  id: "loading",
-                  role: "assistant",
-                  content: "Thinking...",
-                  isStreaming: true,
-                }}
-              />
-            )}
             <div ref={messagesEndRef} />
           </div>
         </main>

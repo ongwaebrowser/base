@@ -2,17 +2,17 @@
 
 import { useState, useEffect } from "react";
 
-export function useTypewriter(text: string, enabled: boolean, speed = 20) {
-  const [displayedText, setDisplayedText] = useState("");
+export function useTypewriter(text: string, enabled: boolean, speed = 15) {
+  const [displayedText, setDisplayedText] = useState(enabled ? "" : text);
 
   useEffect(() => {
     if (enabled) {
-      setDisplayedText("");
+      setDisplayedText(""); // Reset text to start typing
       let i = 0;
       const intervalId = setInterval(() => {
-        setDisplayedText((prev) => prev + text.charAt(i));
+        setDisplayedText(text.substring(0, i + 1));
         i++;
-        if (i > text.length -1) {
+        if (i > text.length) {
           clearInterval(intervalId);
         }
       }, speed);
@@ -21,7 +21,9 @@ export function useTypewriter(text: string, enabled: boolean, speed = 20) {
     } else {
       setDisplayedText(text);
     }
-  }, [text, speed, enabled]);
+  }, [text, enabled, speed]);
 
-  return displayedText;
+  const isTyping = enabled && text && displayedText.length < text.length;
+
+  return displayedText + (isTyping ? '▋' : '');
 }

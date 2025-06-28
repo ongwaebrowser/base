@@ -1,11 +1,10 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Bot, User } from "lucide-react";
 import type { Message } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { MarkdownRenderer } from "./markdown-renderer";
-import { Logo } from "./logo";
 import { useTypewriter } from "@/hooks/use-typewriter";
 import Image from "next/image";
 
@@ -21,11 +20,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
     <div className={cn("flex items-start gap-4", isAssistant ? "" : "flex-row-reverse")}>
       <Avatar className={cn("h-8 w-8", isAssistant ? "" : "bg-primary text-primary-foreground")}>
         {isAssistant ? (
-          <>
-            <div className="flex h-full w-full items-center justify-center rounded-full bg-accent">
-              <Logo className="h-5 w-5 text-accent-foreground" />
-            </div>
-          </>
+          <AvatarFallback className="bg-accent text-accent-foreground">
+            <Bot className="h-5 w-5" />
+          </AvatarFallback>
         ) : (
           <AvatarFallback>
             <User className="h-5 w-5" />
@@ -48,7 +45,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
             data-ai-hint="ai generated"
           />
         ) : (
-          <MarkdownRenderer content={isAssistant && message.isStreaming ? displayedContent : message.content} />
+          <MarkdownRenderer content={displayedContent} />
         )}
       </div>
     </div>
