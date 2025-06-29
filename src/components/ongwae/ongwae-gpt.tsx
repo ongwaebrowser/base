@@ -90,7 +90,12 @@ export function OngwaeGpt() {
     setMessages((prev) => [...prev, assistantMessage]);
 
     try {
-      const historyForAI = newMessages.slice(0, -1).filter(msg => msg.id !== '1').map(({ role, content }) => ({ role, content }));
+      const historyForAI = newMessages.slice(0, -1).filter(msg => msg.id !== '1').map(({ role, content, type }) => {
+        if (type === 'image') {
+          return { role, content: '[An image was generated]' };
+        }
+        return { role, content };
+      });
 
       const aiCall = isDeepSearch
         ? deepSearch({ history: historyForAI, query: input })
