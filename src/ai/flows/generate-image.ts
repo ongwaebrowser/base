@@ -1,4 +1,3 @@
-// src/ai/flows/generate-image.ts
 'use server';
 /**
  * @fileOverview A flow to generate images from text prompts.
@@ -6,6 +5,7 @@
  * - generateImage - A function that handles the image generation process.
  * - GenerateImageInput - The input type for the generateImage function.
  * - GenerateImageOutput - The return type for the generateImage function.
+ * - generateImageTool - A Genkit tool for generating images.
  */
 
 import {ai} from '@/ai/genkit';
@@ -44,4 +44,15 @@ const generateImageFlow = ai.defineFlow(
     }
     return {imageUrl: media.url};
   }
+);
+
+export const generateImageTool = ai.defineTool(
+  {
+    name: 'generateImage',
+    description:
+      'Generates an image from a text prompt. Use this when the user asks to draw, create, generate, or sketch an image.',
+    inputSchema: GenerateImageInputSchema,
+    outputSchema: GenerateImageOutputSchema,
+  },
+  async input => generateImageFlow(input)
 );

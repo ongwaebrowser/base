@@ -7,15 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { ArrowUp, Bot, Loader, Trash, User, Zap } from "lucide-react";
+import { ArrowUp, Bot, Loader, Trash, User, Zap, BrainCircuit } from "lucide-react";
 import { ChatMessage } from "./chat-message";
 import type { Message } from "@/lib/types";
 import { deepSearch } from "@/ai/flows/deep-search";
 import { quickResponse } from "@/ai/flows/quick-response";
-import { generateImage } from "@/ai/flows/generate-image";
 import { useToast } from "@/hooks/use-toast";
 
-const IMAGE_KEYWORDS = ["generate image", "create image", "draw", "sketch", "picture of"];
 const TYPING_SPEED_MS = 15;
 const INITIAL_MESSAGE = {
   id: "1",
@@ -92,38 +90,29 @@ export function OngwaeGpt() {
     setMessages((prev) => [...prev, assistantMessage]);
 
     try {
-      let responseContent = "";
-      let responseType: 'text' | 'image' = 'text';
-
-      const isImageRequest = IMAGE_KEYWORDS.some(keyword => input.toLowerCase().includes(keyword));
       const historyForAI = newMessages.slice(0, -1).map(({ role, content }) => ({ role, content }));
 
-      if (isImageRequest) {
-        const { imageUrl } = await generateImage({ prompt: input });
-        responseContent = imageUrl;
-        responseType = 'image';
-        
+      const aiCall = isDeepSearch
+        ? deepSearch({ history: historyForAI, query: input })
+        : quickResponse({ history: historyForAI, query: input });
+      
+      const result = await aiCall;
+
+      if (result.isImage) {
         setMessages((prev) =>
           prev.map((msg) =>
-            msg.id === assistantMessageId ? { ...msg, content: responseContent, type: responseType, isStreaming: false } : msg
+            msg.id === assistantMessageId ? { ...msg, content: result.response, type: 'image', isStreaming: false } : msg
           )
         );
         setIsLoading(false);
       } else {
-        const aiCall = isDeepSearch
-          ? deepSearch({ history: historyForAI, query: input })
-          : quickResponse({ history: historyForAI, query: input });
-        
-        const result = await aiCall;
-        responseContent = isDeepSearch ? (result as any).results : (result as any).response;
-
         setMessages((prev) =>
           prev.map((msg) =>
-            msg.id === assistantMessageId ? { ...msg, content: responseContent, isStreaming: true } : msg
+            msg.id === assistantMessageId ? { ...msg, content: result.response, isStreaming: true, type: 'text' } : msg
           )
         );
         
-        const typingDuration = responseContent.length * TYPING_SPEED_MS;
+        const typingDuration = result.response.length * TYPING_SPEED_MS;
         setTimeout(() => {
           setMessages((prev) =>
             prev.map((msg) =>
@@ -157,7 +146,7 @@ export function OngwaeGpt() {
       <div className="flex h-screen flex-col bg-background text-foreground">
         <header className="flex items-center justify-between border-b p-4">
           <div className="flex items-center gap-3">
-            <Bot className="h-8 w-8 text-primary" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-brain-circuit text-primary"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.5 3.765 4 4 0 0 0 .5 7.625A3 3 0 1 0 7 19.5a4 4 0 0 0 4.5 3.969 4 4 0 0 0 4.5-3.969A3 3 0 1 0 19 16.5a4 4 0 0 0 .5-7.625 4 4 0 0 0-2.5-3.765A3 3 0 1 0 12 5Z"/><path d="M12 12v1.5"/><path d="M12 6.5V5"/><path d="M16.5 14.5v-2"/><path d="M19.5 12h-2"/><path d="M7.5 9.5v2"/><path d="M4.5 12h2"/><path d="m14.5 17.5 1-1"/><path d="m9.5 17.5-1-1"/><path d="m14.5 6.5 1 1"/><path d="m9.5 6.5-1 1"/></svg>
             <div className="flex flex-col">
               <h1 className="font-headline text-xl font-bold">OngwaeGPT AI</h1>
               <p className="text-xs text-muted-foreground">
