@@ -124,16 +124,28 @@ export function OngwaeGpt() {
       }
     } catch (error) {
       console.error("AI Error:", error);
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-      toast({
-        variant: "destructive",
-        title: "Oh no! Something went wrong.",
-        description: `There was a problem with your request: ${errorMessage}`,
-      });
+      let errorMessageContent = "Sorry, I encountered an error. Please try again.";
+      const genericErrorDescription = error instanceof Error ? error.message : "An unknown error occurred.";
+
+      if (error instanceof Error && error.message.includes('The input token count')) {
+          errorMessageContent = "Image generation is paused because the conversation history is too long. Text-based chat will continue to work. Please clear the chat for a fresh start.";
+          toast({
+              variant: "destructive",
+              title: "Token Limit Reached",
+              description: "The AI's context is full, which may pause image generation.",
+          });
+      } else {
+          toast({
+              variant: "destructive",
+              title: "Oh no! Something went wrong.",
+              description: `There was a problem with your request: ${genericErrorDescription}`,
+          });
+      }
+
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === assistantMessageId
-            ? { ...msg, content: "Sorry, I encountered an error. Please try again.", isStreaming: false }
+            ? { ...msg, content: errorMessageContent, isStreaming: false }
             : msg
         )
       );
