@@ -14,14 +14,14 @@ interface ChatMessageProps {
 }
 
 export function ChatMessage({ message }: ChatMessageProps) {
-  const isAssistant = message.role === "assistant";
-  const displayedContent = useTypewriter(message.content, isAssistant && !!message.isStreaming);
+  const isModel = message.role === "model";
+  const displayedContent = useTypewriter(message.content, isModel && !!message.isStreaming);
 
   return (
-    <div className={cn("flex items-start gap-4", isAssistant ? "" : "justify-end")}>
-      <div className={cn("flex items-start gap-4", isAssistant ? "" : "flex-row-reverse")}>
-        <Avatar className={cn("h-8 w-8", isAssistant ? "" : "bg-primary text-primary-foreground")}>
-          {isAssistant ? (
+    <div className={cn("flex items-start gap-4", isModel ? "" : "justify-end")}>
+      <div className={cn("flex items-start gap-4", isModel ? "" : "flex-row-reverse")}>
+        <Avatar className={cn("h-8 w-8", isModel ? "" : "bg-primary text-primary-foreground")}>
+          {isModel ? (
             <AvatarFallback className="bg-accent text-accent-foreground">
               <Bot className="h-5 w-5" />
             </AvatarFallback>
@@ -34,7 +34,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         <div
           className={cn(
             "max-w-[85%] rounded-lg p-4 shadow-sm",
-            isAssistant ? "rounded-tl-none bg-card" : "rounded-tr-none bg-primary text-primary-foreground"
+            isModel ? "rounded-tl-none bg-card" : "rounded-tr-none bg-primary text-primary-foreground"
           )}
         >
           {message.type === 'image' ? (

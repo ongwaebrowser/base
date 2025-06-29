@@ -15,9 +15,9 @@ import { quickResponse } from "@/ai/flows/quick-response";
 import { useToast } from "@/hooks/use-toast";
 
 const TYPING_SPEED_MS = 15;
-const INITIAL_MESSAGE = {
+const INITIAL_MESSAGE: Message = {
   id: "1",
-  role: "assistant" as const,
+  role: "model",
   content: "Hello there, how may I be of help?",
   isStreaming: false,
 };
@@ -37,7 +37,12 @@ export function OngwaeGpt() {
       const storedMessages = localStorage.getItem("ongwaeGptMessages");
       const parsedMessages = storedMessages ? JSON.parse(storedMessages) : null;
       if (parsedMessages && Array.isArray(parsedMessages) && parsedMessages.length > 0) {
-        setMessages(parsedMessages);
+        // Migration from 'assistant' to 'model' role
+        const migratedMessages = parsedMessages.map((msg: any) => ({
+          ...msg,
+          role: msg.role === 'assistant' ? 'model' : msg.role,
+        }));
+        setMessages(migratedMessages);
       } else {
         setMessages([INITIAL_MESSAGE]);
       }
@@ -83,7 +88,7 @@ export function OngwaeGpt() {
     const assistantMessageId = (Date.now() + 1).toString();
     const assistantMessage: Message = {
       id: assistantMessageId,
-      role: "assistant",
+      role: "model",
       content: "Thinking...",
       isStreaming: true,
     };

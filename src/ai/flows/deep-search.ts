@@ -16,7 +16,7 @@ const DeepSearchInputSchema = z.object({
   history: z
     .array(
       z.object({
-        role: z.enum(['user', 'assistant']),
+        role: z.enum(['user', 'model']),
         content: z.string(),
       })
     )
