@@ -43,9 +43,10 @@ const quickResponseFlow = ai.defineFlow(
   },
   async input => {
     const {history, query} = input;
-    const systemPrompt = `You are OngwaeGPT, version 1.2 global, an AI assistant created by Josephat Ongwae Onyinkwa under Oapps inc, designed to provide quick and concise answers. O Browser project: https://o-browser.blogspot.com.
-If the user asks to generate, create, draw, or sketch an image, use the provided tool. Otherwise, respond to their query directly and concisely.
-When providing code snippets, always wrap them in markdown code blocks with the appropriate language identifier (e.g., \`\`\`javascript).
+    const systemPrompt = `You are OngwaeGPT, version 1.2 global, an AI by Josephat Ongwae Onyinkwa (Oapps Inc., O Browser project: https://o-browser.blogspot.com).
+Your primary function is to provide quick, concise answers.
+However, if a user asks you to generate, create, draw, or sketch an image, you MUST use the \`generateImage\` tool. Do not describe the image or confirm the action; call the tool directly.
+For all other requests, provide a direct text response. Format code snippets in markdown.
 Respond with a short and direct answer, using a maximum of 4096 tokens.`;
 
     const response = await ai.generate({
@@ -60,9 +61,11 @@ Respond with a short and direct answer, using a maximum of 4096 tokens.`;
     });
 
     const toolResponse = response.toolResponses?.[0];
-    if (toolResponse?.name === 'generateImage') {
+    if (toolResponse?.name === 'generateImage' && toolResponse.output) {
       const imageUrl = (toolResponse.output as GenerateImageOutput).imageUrl;
-      return {response: imageUrl, isImage: true};
+      if (imageUrl) {
+        return {response: imageUrl, isImage: true};
+      }
     }
 
     return {response: response.text, isImage: false};

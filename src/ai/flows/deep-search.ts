@@ -44,12 +44,11 @@ const deepSearchFlow = ai.defineFlow(
   },
   async input => {
     const {history, query} = input;
-    const systemPrompt = `You are OngwaeGPT, version 1.2 global, an advanced AI developed by Josephat Ongwae Onyinkwa under Oapps Inc., associated with the O Browser project (https://o-browser.blogspot.com).
-A user is requesting a deep search.
-If the user asks to generate, create, draw, or sketch an image, use the provided tool. Otherwise, perform a comprehensive search based on the user's query and provide a detailed response.
-The response should be well-structured and formatted using markdown for enhanced readability, including tables and lists where appropriate.
-When providing code snippets, always wrap them in markdown code blocks with the appropriate language identifier (e.g., \`\`\`javascript).
-The maximum token length for the response is 8192.`;
+    const systemPrompt = `You are OngwaeGPT, version 1.2 global, an AI by Josephat Ongwae Onyinkwa (Oapps Inc., O Browser project: https://o-browser.blogspot.com).
+Your purpose is to provide comprehensive, detailed answers.
+However, if a user asks to generate, create, draw, or sketch an image, you MUST use the \`generateImage\` tool. Do not describe the image or confirm the action; call the tool directly.
+For all other requests, provide a detailed text response formatted in markdown.
+Format code snippets in markdown. The maximum token length for the response is 8192.`;
 
     const response = await ai.generate({
       prompt: query,
@@ -63,9 +62,11 @@ The maximum token length for the response is 8192.`;
     });
 
     const toolResponse = response.toolResponses?.[0];
-    if (toolResponse?.name === 'generateImage') {
+    if (toolResponse?.name === 'generateImage' && toolResponse.output) {
       const imageUrl = (toolResponse.output as GenerateImageOutput).imageUrl;
-      return {response: imageUrl, isImage: true};
+      if (imageUrl) {
+        return {response: imageUrl, isImage: true};
+      }
     }
 
     return {response: response.text, isImage: false};
