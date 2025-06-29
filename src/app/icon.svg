@@ -1,8 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <title>OngwaeGPT Logo</title>
-    <path d="M12 2a10 10 0 1 0 10 10" />
-    <path d="M12 2a10 10 0 1 1-10 10" />
-    <path d="M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" />
-    <path d="M12 18a6 6 0 0 0 6-6" />
-    <path d="M12 6a6 6 0 0 0-6 6" />
+<svg
+  width="100"
+  height="100"
+  viewBox="0 0 100 100"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <title>OngwaeGPT Logo</title>
+  <path d="M50 10a40 40 0 1 0 40 40" stroke="#8B5CF6" stroke-width="8" fill="none" />
+  <path d="M50 10a40 40 0 1 1-40 40" stroke="#8B5CF6" stroke-width="8" fill="none" />
+  <path d="M66 50a16 16 0 1 1-32 0 16 16 0 0 1 32 0z" fill="#8B5CF6" />
+  <path d="M50 74a24 24 0 0 0 24-24" stroke="#8B5CF6" stroke-width="8" fill="none" />
+  <path d="M50 26a24 24 0 0 0-24 24" stroke="#8B5CF6" stroke-width="8" fill="none" />
 </svg>
