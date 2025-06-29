@@ -5,6 +5,9 @@ import { Toaster } from "@/components/ui/toaster"
 export const metadata: Metadata = {
   title: 'OngwaeGPT AI',
   description: 'An advanced AI assistant by Josephat Ongwae Onyinkwa',
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({
