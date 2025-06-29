@@ -1,11 +1,10 @@
 'use server';
 /**
- * @fileOverview A flow to generate images from text prompts.
+ * @fileOverview A Genkit tool for generating images from text prompts.
  *
- * - generateImage - A function that handles the image generation process.
- * - GenerateImageInput - The input type for the generateImage function.
- * - GenerateImageOutput - The return type for the generateImage function.
  * - generateImageTool - A Genkit tool for generating images.
+ * - GenerateImageInput - The input type for the tool.
+ * - GenerateImageOutput - The return type for the tool.
  */
 
 import {ai} from '@/ai/genkit';
@@ -21,13 +20,11 @@ const GenerateImageOutputSchema = z.object({
 });
 export type GenerateImageOutput = z.infer<typeof GenerateImageOutputSchema>;
 
-export async function generateImage(input: GenerateImageInput): Promise<GenerateImageOutput> {
-  return generateImageFlow(input);
-}
-
-const generateImageFlow = ai.defineFlow(
+export const generateImageTool = ai.defineTool(
   {
-    name: 'generateImageFlow',
+    name: 'generateImage',
+    description:
+      'Generates an image from a text prompt. Use this when the user asks to draw, create, generate, or sketch an image.',
     inputSchema: GenerateImageInputSchema,
     outputSchema: GenerateImageOutputSchema,
   },
@@ -44,15 +41,4 @@ const generateImageFlow = ai.defineFlow(
     }
     return {imageUrl: media.url};
   }
-);
-
-export const generateImageTool = ai.defineTool(
-  {
-    name: 'generateImage',
-    description:
-      'Generates an image from a text prompt. Use this when the user asks to draw, create, generate, or sketch an image.',
-    inputSchema: GenerateImageInputSchema,
-    outputSchema: GenerateImageOutputSchema,
-  },
-  async input => generateImageFlow(input)
 );

@@ -54,7 +54,7 @@ The maximum token length for the response is 8192.`;
     const response = await ai.generate({
       prompt: query,
       history: history,
-      model: 'googleai/gemini-2.0-flash',
+      model: 'googleai/gemini-1.5-flash-latest',
       tools: [generateImageTool],
       system: systemPrompt,
       config: {
