@@ -6,13 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { ArrowUp, Bot, Loader, Trash, User, Zap, BrainCircuit } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { ArrowUp, Loader, Trash, Zap, Moon, Sun } from "lucide-react";
 import { ChatMessage } from "./chat-message";
 import type { Message } from "@/lib/types";
 import { deepSearch } from "@/ai/flows/deep-search";
 import { quickResponse } from "@/ai/flows/quick-response";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "next-themes";
+import { Logo } from "./logo";
 
 const TYPING_SPEED_MS = 15;
 const INITIAL_MESSAGE: Message = {
@@ -31,6 +33,7 @@ export function OngwaeGpt() {
   const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     try {
@@ -168,7 +171,7 @@ export function OngwaeGpt() {
       <div className="flex h-screen flex-col bg-background text-foreground">
         <header className="flex items-center justify-between border-b p-4">
           <div className="flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-brain-circuit text-primary"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.5 3.765 4 4 0 0 0 .5 7.625A3 3 0 1 0 7 19.5a4 4 0 0 0 4.5 3.969 4 4 0 0 0 4.5-3.969A3 3 0 1 0 19 16.5a4 4 0 0 0 .5-7.625 4 4 0 0 0-2.5-3.765A3 3 0 1 0 12 5Z"/><path d="M12 12v1.5"/><path d="M12 6.5V5"/><path d="M16.5 14.5v-2"/><path d="M19.5 12h-2"/><path d="M7.5 9.5v2"/><path d="M4.5 12h2"/><path d="m14.5 17.5 1-1"/><path d="m9.5 17.5-1-1"/><path d="m14.5 6.5 1 1"/><path d="m9.5 6.5-1 1"/></svg>
+            <Logo className="h-8 w-8 text-primary" />
             <div className="flex flex-col">
               <h1 className="font-headline text-xl font-bold">OngwaeGPT AI</h1>
               <p className="text-xs text-muted-foreground">
@@ -176,31 +179,45 @@ export function OngwaeGpt() {
               </p>
             </div>
           </div>
-          <AlertDialog open={isClearConfirmOpen} onOpenChange={setIsClearConfirmOpen}>
+          <div className="flex items-center gap-2">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={() => setIsClearConfirmOpen(true)} disabled={isLoading || messages.length <= 1}>
-                  <Trash className="h-5 w-5" />
-                  <span className="sr-only">Clear Chat</span>
+                <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+                  <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                  <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                  <span className="sr-only">Toggle theme</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Clear Chat</p>
+                <p>Toggle Theme</p>
               </TooltipContent>
             </Tooltip>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently delete your current chat history. This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleClearChat}>Continue</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+            <AlertDialog open={isClearConfirmOpen} onOpenChange={setIsClearConfirmOpen}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={() => setIsClearConfirmOpen(true)} disabled={isLoading || messages.length <= 1}>
+                    <Trash className="h-5 w-5" />
+                    <span className="sr-only">Clear Chat</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Clear Chat</p>
+                </TooltipContent>
+              </Tooltip>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete your current chat history. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleClearChat}>Continue</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 pb-32">
@@ -232,7 +249,7 @@ export function OngwaeGpt() {
                 <span className="sr-only">Send</span>
               </Button>
             </form>
-            <div className="mt-3 flex flex-col items-center justify-center gap-2">
+            <div className="mt-3 flex flex-col items-center justify-center gap-2 sm:flex-row sm:justify-between">
               <div className="flex items-center space-x-2">
                 <Switch
                   id="deep-search-mode"
