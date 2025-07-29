@@ -99,17 +99,25 @@ export function OngwaeGpt() {
     setMessages((prev) => [...prev, assistantMessage]);
 
     try {
-      const historyForAI = newMessages.slice(0, -1).filter(msg => msg.id !== '1').map(({ role, content, type }) => {
-        if (type === 'image') {
-          return { role, content: '[An image was generated]' };
-        }
-        return { role, content };
-      });
+      const historyForAI = newMessages
+        .slice(0, -1) // Exclude the last message (the user's current input)
+        .filter(msg => msg.id !== '1') // Exclude the initial greeting
+        .map(({ role, content, type }) => {
+          if (type === 'image') {
+            return { role, content: '[An image was generated]' };
+          }
+          return { role, content };
+        });
+
+      // Only pass history if it's not empty
+      const aiCallPayload = historyForAI.length > 0
+        ? { history: historyForAI, query: input }
+        : { query: input };
 
       const aiCall = isDeepSearch
-        ? deepSearch({ history: historyForAI, query: input })
-        : quickResponse({ history: historyForAI, query: input });
-      
+        ? deepSearch(aiCallPayload)
+        : quickResponse(aiCallPayload);
+
       const result = await aiCall;
 
       setMessages((prev) =>
@@ -279,3 +287,5 @@ export function OngwaeGpt() {
     </TooltipProvider>
   );
 }
+
+    
