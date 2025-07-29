@@ -262,8 +262,8 @@ export function OngwaeGpt() {
                   {isDeepSearch ? "Deep Search" : "Quick Response"}
                 </Label>
               </div>
-               <p className="text-center text-[11px] text-muted-foreground">
-                OngwaeGPT can make mistakes. Double check it!
+               <p className="text-center text-[10px] text-muted-foreground">
+                OngwaeGPT can make mistakes. Consider checking important information.
               </p>
             </div>
           </div>

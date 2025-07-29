@@ -1,22 +1,33 @@
-<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg
+  width="48"
+  height="48"
+  viewBox="0 0 48 48"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M39.5 24C39.5 32.5563 32.5563 39.5 24 39.5C15.4437 39.5 8.5 32.5563 8.5 24C8.5 15.4437 15.4437 8.5 24 8.5C32.5563 8.5 39.5 15.4437 39.5 24Z"
+    fill="url(#paint0_linear_1_2)"
+  />
+  <path
+    d="M27 15V13C27 12.4477 26.5523 12 26 12H22C21.4477 12 21 12.4477 21 13V15M27 33V35C27 35.5523 26.5523 36 26 36H22C21.4477 36 21 35.5523 21 35V33M24 15V19M24 29V33M24 24C22.3431 24 21 25.3431 21 27V29H27V27C27 25.3431 25.6569 24 24 24ZM24 24C25.6569 24 27 22.6569 27 21V19H21V21C21 22.6569 22.3431 24 24 24ZM15 21H13C12.4477 21 12 21.4477 12 22V26C12 26.5523 12.4477 27 13 27H15M33 21H35C35.5523 21 36 21.4477 36 22V26C36 26.5523 35.5523 27 35 27H33M19 24H15M33 24H29M20 28L18 30M28 28L30 30M20 20L18 18M28 20L30 18"
+    stroke="white"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+
+  />
   <defs>
-    <linearGradient id="favicon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:hsl(253, 100%, 75%);" />
-      <stop offset="100%" style="stop-color:hsl(253, 90%, 60%);" />
+    <linearGradient
+      id="paint0_linear_1_2"
+      x1="8.5"
+      y1="8.5"
+      x2="39.5"
+      y2="39.5"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-color="#A855F7" />
+      <stop offset="1" stop-color="#6D28D9" />
     </linearGradient>
   </defs>
-  <rect width="256" height="256" rx="50" fill="url(#favicon-gradient)"/>
-  <g transform="translate(32, 32) scale(8, 8)">
-    <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.5 3.765 4 4 0 0 0 .5 7.625A3 3 0 1 0 7 19.5a4 4 0 0 0 4.5 3.969 4 4 0 0 0 4.5-3.969A3 3 0 1 0 19 16.5a4 4 0 0 0 .5-7.625 4 4 0 0 0-2.5-3.765A3 3 0 1 0 12 5Z" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M12 12v1.5" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M12 6.5V5" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M16.5 14.5v-2" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M19.5 12h-2" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M7.5 9.5v2" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M4.5 12h2" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="m14.5 17.5 1-1" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="m9.5 17.5-1-1" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="m14.5 6.5 1 1" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="m9.5 6.5-1 1" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-  </g>
 </svg>
