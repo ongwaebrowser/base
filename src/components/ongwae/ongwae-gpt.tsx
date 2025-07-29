@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, type FormEvent } from "react";
@@ -101,7 +102,7 @@ export function OngwaeGpt() {
     try {
       const historyForAI = newMessages
         .slice(0, -1) // Exclude the last message (the user's current input)
-        .filter(msg => msg.id !== '1') // Exclude the initial greeting
+        .filter(msg => msg.id !== '1' && msg.content) // Exclude initial greeting & empty messages
         .map(({ role, content, type }) => {
           if (type === 'image') {
             return { role, content: '[An image was generated]' };
@@ -155,13 +156,28 @@ export function OngwaeGpt() {
       let errorMessageContent = "Sorry, I encountered an error. Please try again.";
       const genericErrorDescription = "The server might be busy. Please wait a moment.";
 
-      if (error instanceof Error && error.message.includes('The input token count')) {
+      if (error instanceof Error) {
+        if (error.message.includes('The input token count')) {
           errorMessageContent = "Sorry, the conversation history is too long. Please clear the chat for a fresh start.";
-           toast({
-              variant: "destructive",
-              title: "Conversation Limit Reached",
-              description: "Please clear the chat to continue.",
+          toast({
+            variant: "destructive",
+            title: "Conversation Limit Reached",
+            description: "Please clear the chat to continue.",
           });
+        } else if (error.message.includes('503 Service Unavailable') || error.message.includes('The model is overloaded')) {
+          errorMessageContent = "The AI is currently busy. Please wait a moment and try again.";
+          toast({
+            variant: "destructive",
+            title: "AI Service Busy",
+            description: "The model is currently overloaded. Please try again shortly.",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Oh no! Something went wrong.",
+            description: genericErrorDescription,
+          });
+        }
       } else {
           toast({
               variant: "destructive",
@@ -287,5 +303,3 @@ export function OngwaeGpt() {
     </TooltipProvider>
   );
 }
-
-    
