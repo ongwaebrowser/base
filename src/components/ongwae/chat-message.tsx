@@ -9,6 +9,7 @@ import { useTypewriter } from "@/hooks/use-typewriter";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { Logo } from "./logo";
+import { Skeleton } from "../ui/skeleton";
 
 interface ChatMessageProps {
   message: Message;
@@ -38,7 +39,13 @@ export function ChatMessage({ message }: ChatMessageProps) {
             isModel ? "rounded-tl-none border bg-card" : "rounded-tr-none bg-primary text-primary-foreground"
           )}
         >
-          {message.type === 'image' ? (
+          {message.isLoading ? (
+             <div className="space-y-2">
+              <Skeleton className="h-4 w-4/5" />
+              <Skeleton className="h-4 w-3/5" />
+              <Skeleton className="h-4 w-4/6" />
+            </div>
+          ) : message.type === 'image' ? (
             <div className="space-y-3">
               <Image
                 src={message.content}

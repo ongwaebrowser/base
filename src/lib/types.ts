@@ -4,4 +4,5 @@ export interface Message {
   content: string;
   type?: 'text' | 'image';
   isStreaming?: boolean;
+  isLoading?: boolean;
 }

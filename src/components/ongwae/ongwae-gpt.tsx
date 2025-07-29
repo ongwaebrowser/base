@@ -92,8 +92,9 @@ export function OngwaeGpt() {
     const assistantMessage: Message = {
       id: assistantMessageId,
       role: "model",
-      content: "Thinking...",
-      isStreaming: true,
+      content: "",
+      isStreaming: false,
+      isLoading: true,
     };
     setMessages((prev) => [...prev, assistantMessage]);
 
@@ -110,6 +111,12 @@ export function OngwaeGpt() {
         : quickResponse({ history: historyForAI, query: input });
       
       const result = await aiCall;
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === assistantMessageId ? { ...msg, isLoading: false } : msg
+        )
+      );
 
       if (result.isImage) {
         setMessages((prev) =>
@@ -138,27 +145,27 @@ export function OngwaeGpt() {
     } catch (error) {
       console.error("AI Error:", error);
       let errorMessageContent = "Sorry, I encountered an error. Please try again.";
-      const genericErrorDescription = error instanceof Error ? error.message : "An unknown error occurred.";
+      const genericErrorDescription = "The server might be busy. Please wait a moment.";
 
       if (error instanceof Error && error.message.includes('The input token count')) {
-          errorMessageContent = "Image generation is paused because the conversation history is too long. Text-based chat will continue to work. Please clear the chat for a fresh start.";
-          toast({
+          errorMessageContent = "Sorry, the conversation history is too long. Please clear the chat for a fresh start.";
+           toast({
               variant: "destructive",
-              title: "Token Limit Reached",
-              description: "The AI's context is full, which may pause image generation.",
+              title: "Conversation Limit Reached",
+              description: "Please clear the chat to continue.",
           });
       } else {
           toast({
               variant: "destructive",
               title: "Oh no! Something went wrong.",
-              description: `There was a problem with your request: ${genericErrorDescription}`,
+              description: genericErrorDescription,
           });
       }
 
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === assistantMessageId
-            ? { ...msg, content: errorMessageContent, isStreaming: false }
+            ? { ...msg, content: errorMessageContent, isStreaming: false, isLoading: false }
             : msg
         )
       );
