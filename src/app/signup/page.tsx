@@ -55,7 +55,9 @@ export default function SignupPage() {
     <div className="flex h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center">
-          <Logo className="h-12 w-12 text-primary" />
+          <Link href="/" aria-label="Home">
+            <Logo className="h-12 w-12 text-primary" />
+          </Link>
           <h1 className="mt-4 font-headline text-3xl font-bold">Create an Account</h1>
           <p className="text-muted-foreground">Get started with your own AI assistant</p>
         </div>

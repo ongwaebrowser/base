@@ -16,8 +16,7 @@ import { quickResponse } from "@/ai/flows/quick-response";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
 import { Logo } from "./logo";
-import Link from "next/link";
-import { addMessageToChat, createChat, deleteChat, getChatsForUser } from "@/lib/actions/chat";
+import { addMessageToChat, createChat, deleteChat } from "@/lib/actions/chat";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { useRouter } from 'next/navigation';
 
@@ -39,7 +38,7 @@ interface OngwaeGptProps {
 export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptProps) {
   const [chats, setChats] = useState<Chat[]>(initialChats);
   const [activeChat, setActiveChat] = useState<Chat | null>(initialActiveChat);
-  const [messages, setMessages] = useState<Message[]>(initialActiveChat?.messages ?? [INITIAL_MESSAGE]);
+  const [messages, setMessages] = useState<Message[]>(initialActiveChat?.messages.length ? initialActiveChat.messages : [INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDeepSearch, setIsDeepSearch] = useState(false);
@@ -53,7 +52,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
 
   useEffect(() => {
     setActiveChat(initialActiveChat);
-    setMessages(initialActiveChat?.messages ?? [INITIAL_MESSAGE]);
+    setMessages(initialActiveChat?.messages.length ? initialActiveChat.messages : [INITIAL_MESSAGE]);
     setChats(initialChats);
   }, [initialActiveChat, initialChats]);
 
@@ -68,17 +67,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
   
   const handleCreateNewChat = async () => {
     if (isLoading) return;
-    setIsLoading(true);
-    try {
-      const newChat = await createChat(user.userId);
-      if (newChat) {
-        setChats(prev => [newChat, ...prev]);
-        router.push(`/chat/${newChat._id}`);
-      }
-    } catch (error) {
-      toast({ variant: 'destructive', title: 'Error creating chat' });
-    }
-    setIsLoading(false);
+    router.push('/chat');
     setIsSidebarOpen(false);
   };
 
@@ -100,7 +89,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
       toast({ title: 'Chat Deleted' });
       
       if (activeChat?._id.toString() === itemToDelete) {
-        router.push('/');
+        router.push('/chat');
       }
     } catch (error) {
       toast({ variant: 'destructive', title: 'Error deleting chat' });
@@ -118,15 +107,17 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
     setIsLoading(true);
 
     let currentChatId = activeChat?._id.toString();
+    let isNewChat = !currentChatId;
 
     // If there's no active chat, create a new one first
-    if (!currentChatId) {
+    if (isNewChat) {
       try {
         const newChat = await createChat(user.userId, input);
         if (newChat) {
           setChats(prev => [newChat, ...prev]);
           setActiveChat(newChat);
           currentChatId = newChat._id.toString();
+          // Replace URL without reloading the page to preserve state
           router.replace(`/chat/${currentChatId}`, { scroll: false });
         } else {
           throw new Error("Failed to create new chat.");
@@ -142,6 +133,15 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
     // Add user message to DB
     if (currentChatId) {
       await addMessageToChat(currentChatId, userMessage);
+       // if it was a new chat, we also need to update the title of the chat in the sidebar
+       if (isNewChat) {
+          const updatedChats = chats.map(c => c._id.toString() === currentChatId ? {...c, title: input.substring(0, 30)} : c);
+          if(!updatedChats.find(c => c._id.toString() === currentChatId)) {
+            const newChat = activeChat ? {...activeChat, title: input.substring(0, 30)} : null;
+            if(newChat) updatedChats.unshift(newChat);
+          }
+          setChats(updatedChats);
+       }
     }
 
     const assistantMessageId = (Date.now() + 1).toString();
@@ -155,9 +155,10 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
     setMessages((prev) => [...prev, assistantMessage]);
 
     try {
-      const historyForAI = [...messages, userMessage]
+      // Filter out the initial welcome message from the history sent to the AI
+      const historyForAI = [...(messages.length === 1 && messages[0].id === '1' ? [] : messages), userMessage]
         .slice(0, -1) 
-        .filter(msg => msg.id !== '1' && msg.content) 
+        .filter(msg => msg.content) 
         .map(({ role, content, type }) => {
           if (type === 'image') {
             return { role, content: '[An image was generated]' };
@@ -209,7 +210,6 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
     } catch (error) {
       console.error("AI Error:", error);
       let errorMessageContent = "Sorry, I encountered an error. Please try again.";
-      const genericErrorDescription = "The server might be busy. Please wait a moment.";
 
        if (error instanceof Error) {
         if (error.message.includes('The input token count')) {
@@ -244,8 +244,16 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
   const handleLogout = async () => {
     // A bit of a hack to call a server action from a client component
     await fetch('/api/logout', { method: 'POST' });
+    router.push('/');
     router.refresh();
   };
+  
+  const getPageTitle = () => {
+    if (activeChat) {
+      return activeChat.title;
+    }
+    return "New Chat";
+  }
 
   return (
     <TooltipProvider>
@@ -292,7 +300,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
                  <Logo className="h-8 w-8 text-primary" />
                  <div>
                   <h1 className="font-headline text-xl font-bold">OngwaeGPT AI</h1>
-                  {activeChat && <p className="text-xs text-muted-foreground truncate max-w-[150px] sm:max-w-xs">{activeChat.title}</p>}
+                  <p className="text-xs text-muted-foreground truncate max-w-[150px] sm:max-w-xs">{getPageTitle()}</p>
                  </div>
               </div>
             </div>

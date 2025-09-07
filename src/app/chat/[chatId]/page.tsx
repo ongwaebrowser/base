@@ -17,6 +17,11 @@ export default async function ChatPage({ params }: ChatPageProps) {
   }
 
   const { chatId } = params;
+  
+  if (chatId === 'new') {
+    redirect('/chat');
+  }
+
   const initialChats = await getChatsForUser(session.userId);
   const initialActiveChat = await getChatById(chatId);
 

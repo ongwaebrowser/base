@@ -1,15 +1,18 @@
-import { OngwaeGpt } from "@/components/ongwae/ongwae-gpt";
+import { AnonymousGpt } from "@/components/ongwae/anonymous-gpt";
 import { getSession } from "@/lib/actions/user";
 import { redirect } from "next/navigation";
-import { getChatsForUser } from "@/lib/actions/chat";
 
 export default async function Home() {
   const session = await getSession();
-  if (!session) {
-    redirect("/login");
-  }
 
-  const initialChats = await getChatsForUser(session.userId);
+  // If the user is logged in, redirect them to their chat interface
+  if (session) {
+    if (session.role === 'admin') {
+      redirect("/admin");
+    }
+    redirect("/chat");
+  }
   
-  return <OngwaeGpt user={session} initialChats={initialChats} initialActiveChat={null} />;
+  // If the user is not logged in, show the anonymous chat interface
+  return <AnonymousGpt />;
 }

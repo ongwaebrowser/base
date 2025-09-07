@@ -13,26 +13,38 @@ export function middleware(request: NextRequest) {
 
 
   const { pathname } = request.nextUrl;
+  
+  // Allow access to the landing page for anonymous users
+  if (!session && pathname === '/') {
+    return NextResponse.next();
+  }
 
-  // If there's no session and the user is not on the login/signup page, redirect to login
+  // If there's no session and the user is not on the login/signup/landing page, redirect to login
   if (!session && !pathname.startsWith('/login') && !pathname.startsWith('/signup')) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // If there is a session and the user tries to access login/signup, redirect to home
+  // If there is a session and the user tries to access login/signup, redirect to chat
   if (session && (pathname.startsWith('/login') || pathname.startsWith('/signup'))) {
-    const redirectUrl = session.role === 'admin' ? '/admin' : '/';
+    const redirectUrl = session.role === 'admin' ? '/admin' : '/chat';
     return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
+   
+   // If a logged-in user hits the root, redirect them to the chat page
+  if (session && pathname === '/') {
+     const redirectUrl = session.role === 'admin' ? '/admin' : '/chat';
+     return NextResponse.redirect(new URL(redirectUrl, request.url));
+  }
+
 
   // Protect the admin route
   if (pathname.startsWith('/admin') && session?.role !== 'admin') {
-    return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect(new URL('/chat', request.url));
   }
   
   // Allow admins to access the main app too, but non-admins cannot access admin routes
   if (pathname.startsWith('/admin') && session?.role !== 'admin') {
-      return NextResponse.redirect(new URL('/', request.url));
+      return NextResponse.redirect(new URL('/chat', request.url));
   }
 
 
