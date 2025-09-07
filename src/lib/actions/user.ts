@@ -4,7 +4,8 @@
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import clientPromise from "@/lib/mongodb";
-import {_prepareDataForClient} from "mongodb/src/utils";
+import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 const CreateUserSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -70,6 +71,9 @@ export async function verifyLogin(credentials: z.infer<typeof LoginUserSchema>) 
             return { success: false, message: "Incorrect password." };
         }
 
+        const sessionData = { userId: user._id.toString(), name: user.name, email: user.email };
+        await createSession(sessionData);
+
         return { success: true, message: "Login successful!" };
     } catch (error) {
         console.error("Login error:", error);
@@ -88,4 +92,26 @@ export async function findUserByEmail(email: string) {
     console.error("Error finding user:", error);
     return null;
   }
+}
+
+async function createSession(sessionData: any) {
+  const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+  cookies().set("session", JSON.stringify(sessionData), { expires, httpOnly: true });
+}
+
+export async function getSession() {
+  const sessionCookie = cookies().get("session");
+  if (sessionCookie) {
+    try {
+      return JSON.parse(sessionCookie.value);
+    } catch (error) {
+      return null;
+    }
+  }
+  return null;
+}
+
+export async function logout() {
+  cookies().delete("session");
+  revalidatePath("/");
 }

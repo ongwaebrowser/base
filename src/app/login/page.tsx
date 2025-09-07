@@ -1,7 +1,7 @@
 // src/app/login/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +31,7 @@ export default function LoginPage() {
         description: "Redirecting...",
       });
       router.push('/');
+      router.refresh(); // This is important to re-fetch server data
     } else {
       toast({
         variant: "destructive",
