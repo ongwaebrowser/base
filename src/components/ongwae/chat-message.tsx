@@ -24,7 +24,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       <div className={cn("flex w-full max-w-[85%] items-start gap-4", isModel ? "" : "flex-row-reverse")}>
         <Avatar className={cn("h-8 w-8", isModel ? "" : "bg-primary text-primary-foreground")}>
           {isModel ? (
-            <AvatarFallback className="bg-background">
+            <AvatarFallback className="bg-card border-2 border-primary/20">
               <Logo className="h-5 w-5 text-primary" />
             </AvatarFallback>
           ) : (
@@ -35,8 +35,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
         </Avatar>
         <div
           className={cn(
-            "flex-1 rounded-lg p-4 shadow-sm",
-            isModel ? "rounded-tl-none border bg-card" : "rounded-tr-none bg-primary text-primary-foreground"
+            "flex-1 rounded-xl p-4 shadow-md",
+            isModel ? "rounded-tl-none border bg-card" : "rounded-tr-none bg-accent text-accent-foreground"
           )}
         >
           {message.isLoading ? (

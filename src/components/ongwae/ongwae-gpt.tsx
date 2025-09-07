@@ -269,9 +269,9 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
 
   return (
     <TooltipProvider>
-      <div className="flex h-screen flex-col bg-background text-foreground">
+      <div className="flex h-screen flex-col bg-transparent text-foreground">
         
-        <aside className="hidden md:flex fixed top-0 left-0 h-full w-64 flex-col border-r bg-background p-4 z-10">
+        <aside className="hidden md:flex fixed top-0 left-0 h-full w-64 flex-col border-r bg-background/80 backdrop-blur-sm p-4 z-10">
           <ChatSidebarContent
             user={user}
             chats={chats}
@@ -285,7 +285,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
         </aside>
 
         <div className="flex h-full flex-col md:pl-64">
-          <header className="flex items-center justify-between border-b p-4">
+          <header className="flex items-center justify-between border-b p-4 sticky top-0 z-0 bg-background/50 backdrop-blur-sm">
             <div className="flex items-center gap-3">
               <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                 <SheetTrigger asChild className="md:hidden">
@@ -293,7 +293,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
                     <PanelLeft />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-72 p-0">
+                <SheetContent side="left" className="w-72 p-0 bg-background/80 backdrop-blur-sm">
                   <ChatSidebarContent
                     user={user}
                     chats={chats}
@@ -311,7 +311,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
               <div className="flex items-center gap-2">
                  <Logo className="h-8 w-8 text-primary" />
                  <div>
-                  <h1 className="font-headline text-xl font-bold">OngwaeGPT AI</h1>
+                  <h1 className="font-headline text-xl font-bold">OngwaeGPT</h1>
                   <p className="text-xs text-muted-foreground truncate max-w-[150px] sm:max-w-xs">{getPageTitle()}</p>
                  </div>
               </div>
@@ -341,14 +341,14 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
             </div>
           </main>
 
-          <footer className="fixed bottom-0 right-0 border-t bg-background/80 backdrop-blur-sm md:left-64">
+          <footer className="fixed bottom-0 right-0 border-t bg-background/50 backdrop-blur-sm md:left-64">
             <div className="mx-auto max-w-4xl p-4">
               <form onSubmit={handleSubmit} className="relative">
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask OngwaeGPT anything..."
-                  className="h-12 w-full rounded-full bg-card py-3 pl-5 pr-28 text-base shadow-lg"
+                  className="h-12 w-full rounded-full border-2 border-primary/20 bg-card/80 py-3 pl-5 pr-28 text-base shadow-lg focus:border-primary/60 focus:ring-4 focus:ring-primary/20"
                   disabled={isLoading}
                 />
                 <Button
@@ -456,7 +456,7 @@ function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat
           {chats.map(chat => (
             <li key={chat._id.toString()}>
               <div
-                className={`group flex items-center justify-between rounded-md p-2 text-sm font-medium cursor-pointer ${activeChatId === chat._id.toString() ? 'bg-primary/20 text-primary' : 'hover:bg-muted'}`}
+                className={`group flex items-center justify-between rounded-md p-2 text-sm font-medium cursor-pointer transition-colors ${activeChatId === chat._id.toString() ? 'bg-primary/20 text-primary' : 'hover:bg-muted'}`}
                 onClick={() => onSelectChat(chat._id.toString())}
               >
                 <span className="truncate flex-1">{chat.title}</span>
@@ -465,10 +465,10 @@ function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat
                         <Button
                             variant="ghost"
                             size="icon"
-                            className={`h-7 w-7 invisible group-hover:visible ${activeChatId === chat._id.toString() ? 'visible' : ''}`}
+                            className={`h-7 w-7 invisible group-hover:visible transition-opacity ${activeChatId === chat._id.toString() ? 'visible' : ''}`}
                             onClick={(e) => { e.stopPropagation(); onDeleteChat(chat._id.toString()); }}
                         >
-                            <Trash2 className="h-4 w-4 text-muted-foreground" />
+                            <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent><p>Delete chat</p></TooltipContent>
@@ -482,7 +482,7 @@ function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat
          <div className="text-sm p-2 mb-2">
            <p className="font-semibold">{user.name}</p>
          </div>
-         <Button variant="ghost" className="w-full justify-start text-red-500 hover:bg-red-500/10 hover:text-red-500" onClick={onDeleteAccount}>
+         <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:bg-destructive/10 hover:text-destructive" onClick={onDeleteAccount}>
            <UserX className="mr-2" />
            Delete Account
          </Button>
