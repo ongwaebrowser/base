@@ -10,16 +10,7 @@ import { Loader, LogIn } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/ongwae/logo";
 import { useRouter } from 'next/navigation';
-
-// We need a server action for login as well
-async function verifyLogin(formData: FormData) {
-  'use server'
-  // This is a placeholder for actual login verification
-  // In a real app, you'd check credentials against the database
-  // For now, we'll simulate a successful login
-  return { success: true, message: 'Login successful (simulated)' }
-}
-
+import { verifyLogin } from "@/lib/actions/user";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -32,36 +23,21 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    // This is a placeholder as well until we implement sessions
-    // In a real app, you'd use a library like next-auth
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Login Successful!",
-      description: "Redirecting you to the main app... (This is a demo)",
-    });
-    
-    router.push('/');
+    const result = await verifyLogin({ email, password });
 
-    // In a real implementation:
-    // const formData = new FormData();
-    // formData.append('email', email);
-    // formData.append('password', password);
-    // const result = await verifyLogin(formData);
-
-    // if (result.success) {
-    //   toast({
-    //     title: "Login Successful!",
-    //     description: "Redirecting...",
-    //   });
-    //   router.push('/');
-    // } else {
-    //   toast({
-    //     variant: "destructive",
-    //     title: "Login Failed",
-    //     description: result.message,
-    //   });
-    // }
+    if (result.success) {
+      toast({
+        title: "Login Successful!",
+        description: "Redirecting...",
+      });
+      router.push('/');
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: result.message,
+      });
+    }
     
     setIsLoading(false);
   };

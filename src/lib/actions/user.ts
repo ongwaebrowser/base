@@ -6,14 +6,19 @@ import bcrypt from "bcryptjs";
 import clientPromise from "@/lib/mongodb";
 import {_prepareDataForClient} from "mongodb/src/utils";
 
-const UserSchema = z.object({
+const CreateUserSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   email: z.string().email("Invalid email address."),
   password: z.string().min(8, "Password must be at least 8 characters."),
 });
 
-export async function createUser(userData: z.infer<typeof UserSchema>) {
-  const validation = UserSchema.safeParse(userData);
+const LoginUserSchema = z.object({
+  email: z.string().email("Invalid email address."),
+  password: z.string().min(1, "Password is required."),
+});
+
+export async function createUser(userData: z.infer<typeof CreateUserSchema>) {
+  const validation = CreateUserSchema.safeParse(userData);
   if (!validation.success) {
     return { success: false, message: validation.error.errors[0].message };
   }
@@ -47,6 +52,31 @@ export async function createUser(userData: z.infer<typeof UserSchema>) {
     return { success: false, message: "An unexpected error occurred. Please try again later." };
   }
 }
+
+export async function verifyLogin(credentials: z.infer<typeof LoginUserSchema>) {
+    const validation = LoginUserSchema.safeParse(credentials);
+    if (!validation.success) {
+        return { success: false, message: validation.error.errors[0].message };
+    }
+
+    try {
+        const user = await findUserByEmail(credentials.email);
+        if (!user) {
+            return { success: false, message: "No user found with this email." };
+        }
+
+        const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
+        if (!isPasswordCorrect) {
+            return { success: false, message: "Incorrect password." };
+        }
+
+        return { success: true, message: "Login successful!" };
+    } catch (error) {
+        console.error("Login error:", error);
+        return { success: false, message: "An unexpected error occurred during login." };
+    }
+}
+
 
 export async function findUserByEmail(email: string) {
   try {
