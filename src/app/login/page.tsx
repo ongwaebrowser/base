@@ -9,26 +9,60 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader, LogIn } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/ongwae/logo";
+import { useRouter } from 'next/navigation';
+
+// We need a server action for login as well
+async function verifyLogin(formData: FormData) {
+  'use server'
+  // This is a placeholder for actual login verification
+  // In a real app, you'd check credentials against the database
+  // For now, we'll simulate a successful login
+  return { success: true, message: 'Login successful (simulated)' }
+}
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // TODO: Implement actual login logic with database
+    // This is a placeholder as well until we implement sessions
+    // In a real app, you'd use a library like next-auth
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     toast({
-      variant: "destructive",
-      title: "Login Failed",
-      description: "This is a demo. Login functionality is not yet implemented.",
+      title: "Login Successful!",
+      description: "Redirecting you to the main app... (This is a demo)",
     });
+    
+    router.push('/');
 
+    // In a real implementation:
+    // const formData = new FormData();
+    // formData.append('email', email);
+    // formData.append('password', password);
+    // const result = await verifyLogin(formData);
+
+    // if (result.success) {
+    //   toast({
+    //     title: "Login Successful!",
+    //     description: "Redirecting...",
+    //   });
+    //   router.push('/');
+    // } else {
+    //   toast({
+    //     variant: "destructive",
+    //     title: "Login Failed",
+    //     description: result.message,
+    //   });
+    // }
+    
     setIsLoading(false);
   };
 

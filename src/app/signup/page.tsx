@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/ongwae/logo";
+import { createUser } from "@/lib/actions/user";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -16,18 +18,35 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password.length < 8) {
+      toast({
+        variant: "destructive",
+        title: "Password Too Short",
+        description: "Your password must be at least 8 characters long.",
+      });
+      return;
+    }
     setIsLoading(true);
 
-    // TODO: Implement actual signup logic with database
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Signup Submitted",
-      description: "This is a demo. Signup functionality is not yet implemented.",
-    });
+    const result = await createUser({ name, email, password });
+
+    if (result.success) {
+      toast({
+        title: "Account Created!",
+        description: result.message,
+      });
+      router.push('/login');
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Signup Failed",
+        description: result.message,
+      });
+    }
 
     setIsLoading(false);
   };
@@ -70,7 +89,7 @@ export default function SignupPage() {
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder="•••••••• (at least 8 characters)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
