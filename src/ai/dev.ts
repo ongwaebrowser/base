@@ -8,3 +8,4 @@ import '@/ai/flows/generate-image.ts';
 import '@/ai/flows/generate-table.ts';
 import '@/ai/flows/code-generation.ts';
 import '@/ai/flows/anonymous-chat.ts';
+import '@/ai/flows/delete-user-data.ts';

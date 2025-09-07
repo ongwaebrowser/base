@@ -8,6 +8,7 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { User } from "@/lib/types";
 import { ObjectId } from "mongodb";
+import { deleteUserDataFlow } from "@/ai/flows/delete-user-data";
 
 const CreateUserSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -49,7 +50,6 @@ export async function createUser(userData: z.infer<typeof CreateUserSchema>) {
       return { success: false, message: "A user with this email already exists." };
     }
     
-    // Determine user role
     const adminExists = await findAdmin();
     const role = adminExists ? "user" : "admin";
 
@@ -125,6 +125,24 @@ export async function getAllUsers(): Promise<User[]> {
     return [];
   }
 }
+
+export async function deleteUserAccount() {
+  const session = await getSession();
+  if (!session) {
+    return { success: false, message: "Not authenticated" };
+  }
+
+  try {
+    await deleteUserDataFlow({ userId: session.userId });
+    await logout(); // Log the user out after deleting their data.
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting user account:", error);
+    return { success: false, message: "An error occurred while deleting the account." };
+  }
+}
+
 
 async function createSession(sessionData: any) {
   const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days

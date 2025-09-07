@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bot, User, Download } from "lucide-react";
+import { User, Download } from "lucide-react";
 import type { Message } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { MarkdownRenderer } from "./markdown-renderer";

@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { ArrowUp, Loader, Zap, Moon, Sun, MessageSquarePlus, Trash2, LogOut, PanelLeft, X } from "lucide-react";
+import { ArrowUp, Loader, Zap, Moon, Sun, MessageSquarePlus, Trash2, LogOut, PanelLeft, X, UserX } from "lucide-react";
 import { ChatMessage } from "./chat-message";
 import type { Message, Chat } from "@/lib/types";
 import { deepSearch } from "@/ai/flows/deep-search";
@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
 import { Logo } from "./logo";
 import { addMessageToChat, createChat, deleteChat } from "@/lib/actions/chat";
+import { deleteUserAccount } from "@/lib/actions/user";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { useRouter } from 'next/navigation';
 
@@ -44,6 +45,8 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
   const [isDeepSearch, setIsDeepSearch] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [isDeleteAccountConfirmOpen, setIsDeleteAccountConfirmOpen] = useState(false);
+
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -97,6 +100,21 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
     setItemToDelete(null);
   };
 
+  const handleDeleteAccount = async () => {
+    try {
+      const result = await deleteUserAccount();
+      if (result.success) {
+        toast({ title: "Account Deleted", description: "Your account and data have been permanently removed." });
+        await handleLogout();
+      } else {
+        toast({ variant: "destructive", title: "Deletion Failed", description: result.message });
+      }
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Error deleting account' });
+    }
+    setIsDeleteAccountConfirmOpen(false);
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
@@ -109,7 +127,6 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
     let currentChatId = activeChat?._id.toString();
     let isNewChat = !currentChatId;
 
-    // If there's no active chat, create a new one first
     if (isNewChat) {
       try {
         const newChat = await createChat(user.userId, input);
@@ -117,7 +134,6 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
           setChats(prev => [newChat, ...prev]);
           setActiveChat(newChat);
           currentChatId = newChat._id.toString();
-          // Replace URL without reloading the page to preserve state
           router.replace(`/chat/${currentChatId}`, { scroll: false });
         } else {
           throw new Error("Failed to create new chat.");
@@ -125,15 +141,13 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
       } catch (error) {
         toast({ variant: "destructive", title: "Could not start a new chat." });
         setIsLoading(false);
-        setMessages(prev => prev.slice(0, -1)); // remove user message
+        setMessages(prev => prev.slice(0, -1));
         return;
       }
     }
     
-    // Add user message to DB
     if (currentChatId) {
       await addMessageToChat(currentChatId, userMessage);
-       // if it was a new chat, we also need to update the title of the chat in the sidebar
        if (isNewChat) {
           const updatedChats = chats.map(c => c._id.toString() === currentChatId ? {...c, title: input.substring(0, 30)} : c);
           if(!updatedChats.find(c => c._id.toString() === currentChatId)) {
@@ -155,7 +169,6 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
     setMessages((prev) => [...prev, assistantMessage]);
 
     try {
-      // Filter out the initial welcome message from the history sent to the AI
       const historyForAI = [...(activeChat?.messages || []), userMessage]
         .slice(0, -1) 
         .filter(msg => msg.content) 
@@ -190,7 +203,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
 
       setMessages((prev) =>
         prev.map((msg) =>
-          msg.id === assistantMessageId ? { ...finalAssistantMessage, isLoading: false, isStreaming: true } : msg
+          msg.id === assistantMessageId ? { ...finalAssistantMessage, isLoading: false, isStreaming: !result.isImage } : msg
         )
       );
 
@@ -242,7 +255,6 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
   };
   
   const handleLogout = async () => {
-    // A bit of a hack to call a server action from a client component
     await fetch('/api/logout', { method: 'POST' });
     router.push('/');
     router.refresh();
@@ -259,7 +271,6 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
     <TooltipProvider>
       <div className="flex h-screen flex-col bg-background text-foreground">
         
-        {/* Sidebar for Desktop */}
         <aside className="hidden md:flex fixed top-0 left-0 h-full w-64 flex-col border-r bg-background p-4 z-10">
           <ChatSidebarContent
             user={user}
@@ -268,6 +279,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
             onNewChat={handleCreateNewChat}
             onSelectChat={handleSelectChat}
             onDeleteChat={(id) => setItemToDelete(id)}
+            onDeleteAccount={() => setIsDeleteAccountConfirmOpen(true)}
             onLogout={handleLogout}
           />
         </aside>
@@ -275,7 +287,6 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
         <div className="flex h-full flex-col md:pl-64">
           <header className="flex items-center justify-between border-b p-4">
             <div className="flex items-center gap-3">
-              {/* Mobile Sidebar Toggle */}
               <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                 <SheetTrigger asChild className="md:hidden">
                   <Button variant="ghost" size="icon">
@@ -290,6 +301,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
                     onNewChat={handleCreateNewChat}
                     onSelectChat={handleSelectChat}
                     onDeleteChat={(id) => setItemToDelete(id)}
+                    onDeleteAccount={() => setIsDeleteAccountConfirmOpen(true)}
                     onLogout={handleLogout}
                     isSheet
                   />
@@ -384,6 +396,21 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
               </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
+
+        <AlertDialog open={isDeleteAccountConfirmOpen} onOpenChange={setIsDeleteAccountConfirmOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Your Account?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete your account and all of your chat history. This action is irreversible. Are you sure you want to continue?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction variant="destructive" onClick={handleDeleteAccount}>Delete Account</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
       </div>
     </TooltipProvider>
   );
@@ -398,10 +425,11 @@ interface ChatSidebarContentProps {
   onSelectChat: (id: string) => void;
   onDeleteChat: (id: string) => void;
   onLogout: () => void;
+  onDeleteAccount: () => void;
   isSheet?: boolean;
 }
 
-function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat, onDeleteChat, onLogout, isSheet = false}: ChatSidebarContentProps) {
+function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat, onDeleteChat, onLogout, onDeleteAccount, isSheet = false}: ChatSidebarContentProps) {
   return (
     <div className="flex h-full flex-col">
        <div className="flex items-center justify-between border-b p-4">
@@ -454,7 +482,11 @@ function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat
          <div className="text-sm p-2 mb-2">
            <p className="font-semibold">{user.name}</p>
          </div>
-         <Button variant="outline" className="w-full" onClick={onLogout}>
+         <Button variant="ghost" className="w-full justify-start text-red-500 hover:bg-red-500/10 hover:text-red-500" onClick={onDeleteAccount}>
+           <UserX className="mr-2" />
+           Delete Account
+         </Button>
+         <Button variant="outline" className="w-full mt-2" onClick={onLogout}>
            <LogOut className="mr-2" />
            Logout
          </Button>
