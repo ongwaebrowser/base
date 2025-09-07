@@ -16,6 +16,7 @@ import { quickResponse } from "@/ai/flows/quick-response";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
 import { Logo } from "./logo";
+import Link from "next/link";
 
 const TYPING_SPEED_MS = 15;
 const INITIAL_MESSAGE: Message = {
@@ -110,7 +111,6 @@ export function OngwaeGpt() {
           return { role, content };
         });
 
-      // Only pass history if it's not empty
       const aiCallPayload = historyForAI.length > 0
         ? { history: historyForAI, query: input }
         : { query: input };
@@ -211,6 +211,9 @@ export function OngwaeGpt() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+             <Button variant="outline" size="sm" asChild>
+                <Link href="/login">Sign In</Link>
+            </Button>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
