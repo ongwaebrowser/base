@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, type FormEvent } from "react";
@@ -153,7 +154,7 @@ export function AnonymousGpt() {
             </div>
           </header>
 
-          <main className="flex-1 overflow-y-auto p-4 pb-32">
+          <main className="flex-1 overflow-y-auto p-4 pb-48">
             <div className="mx-auto max-w-4xl space-y-8">
               {messages.map((message) => (
                 <ChatMessage key={message.id} message={message} />
@@ -185,6 +186,11 @@ export function AnonymousGpt() {
                <p className="mt-3 text-center text-[10px] text-muted-foreground">
                 OngwaeGPT can make mistakes. Consider checking important information.
               </p>
+              <div className="mt-2 flex justify-center gap-4 text-xs text-muted-foreground">
+                <Link href="/about" className="hover:text-primary">About</Link>
+                <Link href="/terms" className="hover:text-primary">Terms</Link>
+                <Link href="/privacy" className="hover:text-primary">Privacy</Link>
+              </div>
             </div>
           </footer>
         </div>

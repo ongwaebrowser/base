@@ -1,3 +1,4 @@
+
 import { NextResponse, type NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
@@ -13,6 +14,11 @@ export function middleware(request: NextRequest) {
 
 
   const { pathname } = request.nextUrl;
+  const publicPages = ['/about', '/terms', '/privacy'];
+
+  if (publicPages.includes(pathname)) {
+    return NextResponse.next();
+  }
   
   // Allow access to the landing page for anonymous users
   if (!session && pathname === '/') {
