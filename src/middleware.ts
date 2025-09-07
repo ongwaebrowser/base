@@ -1,17 +1,40 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const session = request.cookies.get('session');
+  const sessionCookie = request.cookies.get('session');
+  let session;
+  if(sessionCookie) {
+    try {
+      session = JSON.parse(sessionCookie.value);
+    } catch(e) {
+      // Invalid session cookie
+    }
+  }
+
+
+  const { pathname } = request.nextUrl;
 
   // If there's no session and the user is not on the login/signup page, redirect to login
-  if (!session && !request.nextUrl.pathname.startsWith('/login') && !request.nextUrl.pathname.startsWith('/signup')) {
+  if (!session && !pathname.startsWith('/login') && !pathname.startsWith('/signup')) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
   // If there is a session and the user tries to access login/signup, redirect to home
-  if (session && (request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup'))) {
+  if (session && (pathname.startsWith('/login') || pathname.startsWith('/signup'))) {
+    const redirectUrl = session.role === 'admin' ? '/admin' : '/';
+    return NextResponse.redirect(new URL(redirectUrl, request.url));
+  }
+
+  // Protect the admin route
+  if (pathname.startsWith('/admin') && session?.role !== 'admin') {
     return NextResponse.redirect(new URL('/', request.url));
   }
+  
+  // Allow admins to access the main app too, but non-admins cannot access admin routes
+  if (pathname.startsWith('/admin') && session?.role !== 'admin') {
+      return NextResponse.redirect(new URL('/', request.url));
+  }
+
 
   return NextResponse.next();
 }
