@@ -156,7 +156,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
 
     try {
       // Filter out the initial welcome message from the history sent to the AI
-      const historyForAI = [...(messages.length === 1 && messages[0].id === '1' ? [] : messages), userMessage]
+      const historyForAI = [...(activeChat?.messages || []), userMessage]
         .slice(0, -1) 
         .filter(msg => msg.content) 
         .map(({ role, content, type }) => {
