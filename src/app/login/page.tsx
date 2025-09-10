@@ -31,11 +31,8 @@ export default function LoginPage() {
         description: "Redirecting...",
       });
       
-      if (result.role === 'admin') {
-        router.push('/admin');
-      } else {
-        router.push('/chat');
-      }
+      // We don't need to conditionally push here because the middleware will handle the redirect
+      // after the page refreshes and the new session is recognized.
       router.refresh(); 
     } else {
       toast({

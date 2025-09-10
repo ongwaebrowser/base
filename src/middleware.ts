@@ -30,13 +30,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // If there is a session and the user tries to access login/signup, redirect to chat
+  // If there is a session and the user tries to access login/signup, redirect to their dashboard
   if (session && (pathname.startsWith('/login') || pathname.startsWith('/signup'))) {
     const redirectUrl = session.role === 'admin' ? '/admin' : '/chat';
     return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
    
-   // If a logged-in user hits the root, redirect them to the chat page
+   // If a logged-in user hits the root, redirect them to their dashboard
   if (session && pathname === '/') {
      const redirectUrl = session.role === 'admin' ? '/admin' : '/chat';
      return NextResponse.redirect(new URL(redirectUrl, request.url));
