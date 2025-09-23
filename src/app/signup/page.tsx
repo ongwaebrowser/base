@@ -32,20 +32,29 @@ export default function SignupPage() {
     }
     setIsLoading(true);
 
-    const result = await createUser({ name, email, password });
+    try {
+        const result = await createUser({ name, email, password });
 
-    if (result.success) {
-      toast({
-        title: "Account Created!",
-        description: result.message,
-      });
-      router.push('/login');
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Signup Failed",
-        description: result.message,
-      });
+        if (result.success) {
+        toast({
+            title: "Account Created!",
+            description: result.message,
+        });
+        router.push('/login');
+        } else {
+        toast({
+            variant: "destructive",
+            title: "Signup Failed",
+            description: result.message,
+        });
+        }
+    } catch (error) {
+        console.error("Signup page error:", error);
+        toast({
+            variant: "destructive",
+            title: "Signup Failed",
+            description: "An unexpected error occurred.",
+        });
     }
 
     setIsLoading(false);
@@ -71,6 +80,7 @@ export default function SignupPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              autoComplete="name"
               disabled={isLoading}
             />
           </div>
@@ -83,6 +93,7 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="email"
               disabled={isLoading}
             />
           </div>
@@ -95,6 +106,7 @@ export default function SignupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="new-password"
               disabled={isLoading}
             />
           </div>

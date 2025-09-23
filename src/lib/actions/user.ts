@@ -56,6 +56,7 @@ export async function createUser(userData: z.infer<typeof CreateUserSchema>) {
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     
     const result = await usersCollection.insertOne({
+      _id: new ObjectId(),
       name: userData.name,
       email: userData.email,
       password: hashedPassword,
@@ -146,7 +147,7 @@ export async function deleteUserAccount() {
 
 async function createSession(sessionData: any) {
   const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-  cookies().set("session", JSON.stringify(sessionData), { expires, httpOnly: true });
+  cookies().set("session", JSON.stringify(sessionData), { expires, httpOnly: true, path: '/' });
 }
 
 export async function getSession(): Promise<{ userId: string; name: string; email: string; role: 'user' | 'admin' } | null> {
@@ -155,6 +156,8 @@ export async function getSession(): Promise<{ userId: string; name: string; emai
     try {
       return JSON.parse(sessionCookie.value);
     } catch (error) {
+      // Corrupted cookie, delete it
+      cookies().delete("session");
       return null;
     }
   }

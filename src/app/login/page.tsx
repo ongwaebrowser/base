@@ -23,26 +23,35 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    const result = await verifyLogin({ email, password });
+    try {
+      const result = await verifyLogin({ email, password });
 
-    if (result.success) {
-      toast({
-        title: "Login Successful!",
-        description: "Redirecting...",
-      });
-      
-      // We don't need to conditionally push here because the middleware will handle the redirect
-      // after the page refreshes and the new session is recognized.
-      router.refresh(); 
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: result.message,
-      });
+      if (result.success) {
+        toast({
+          title: "Login Successful!",
+          description: "Redirecting...",
+        });
+        
+        // Refresh the page to make sure the middleware recognizes the new session
+        // and redirects the user correctly.
+        router.refresh(); 
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: result.message,
+        });
+        setIsLoading(false);
+      }
+    } catch (error) {
+        console.error("Login page error:", error);
+        toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: "An unexpected error occurred.",
+        });
+        setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (
@@ -65,6 +74,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="email"
               disabled={isLoading}
             />
           </div>
@@ -77,6 +87,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
               disabled={isLoading}
             />
           </div>

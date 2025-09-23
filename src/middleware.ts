@@ -1,58 +1,44 @@
-
 import { NextResponse, type NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get('session');
   let session;
   if(sessionCookie) {
     try {
       session = JSON.parse(sessionCookie.value);
     } catch(e) {
-      // Invalid session cookie
+      // Invalid session cookie, delete it and proceed as unauthenticated
+      const response = NextResponse.redirect(new URL('/login', request.url));
+      response.cookies.delete('session');
+      return response;
     }
   }
 
-
   const { pathname } = request.nextUrl;
-  const publicPages = ['/about', '/terms', '/privacy'];
+  const publicPages = ['/about', '/terms', '/privacy', '/login', '/signup'];
 
-  if (publicPages.includes(pathname)) {
-    return NextResponse.next();
-  }
-  
-  // Allow access to the landing page for anonymous users
-  if (!session && pathname === '/') {
-    return NextResponse.next();
-  }
+  const isPublicPage = publicPages.some(page => pathname.startsWith(page));
 
-  // If there's no session and the user is not on the login/signup/landing page, redirect to login
-  if (!session && !pathname.startsWith('/login') && !pathname.startsWith('/signup')) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
-  // If there is a session and the user tries to access login/signup, redirect to their dashboard
-  if (session && (pathname.startsWith('/login') || pathname.startsWith('/signup'))) {
+  // If a logged-in user tries to access the root, login, or signup, redirect them to their dashboard
+  if (session && (pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/signup'))) {
     const redirectUrl = session.role === 'admin' ? '/admin' : '/chat';
     return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
-   
-   // If a logged-in user hits the root, redirect them to their dashboard
-  if (session && pathname === '/') {
-     const redirectUrl = session.role === 'admin' ? '/admin' : '/chat';
-     return NextResponse.redirect(new URL(redirectUrl, request.url));
-  }
 
+  // If an unauthenticated user tries to access a protected page, redirect to login
+  if (!session && pathname !== '/' && !isPublicPage) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
 
   // Protect the admin route
   if (pathname.startsWith('/admin') && session?.role !== 'admin') {
     return NextResponse.redirect(new URL('/chat', request.url));
   }
-  
-  // Allow admins to access the main app too, but non-admins cannot access admin routes
-  if (pathname.startsWith('/admin') && session?.role !== 'admin') {
-      return NextResponse.redirect(new URL('/chat', request.url));
-  }
 
+  // Allow access to the landing page for anonymous users
+  if (pathname === '/' && !session) {
+    return NextResponse.next();
+  }
 
   return NextResponse.next();
 }
