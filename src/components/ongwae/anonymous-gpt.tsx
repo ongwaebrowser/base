@@ -64,14 +64,14 @@ export function AnonymousGpt() {
 
     try {
       const historyForAI = [...messages, userMessage]
-        .slice(0, -1)
-        .filter(msg => msg.id !== '1' && msg.content)
+        .slice(1, -1) // Remove initial message and the latest user message which is in the query
+        .filter(msg => msg.content)
         .map(({ role, content, type }) => {
           if (type === 'image') {
             return { role, content: '[An image was generated]' };
           }
           return { role, content };
-        });
+        }).slice(-4); // Limit history for anon users
 
       const aiCallPayload = historyForAI.length > 0
         ? { history: historyForAI, query: input }
@@ -147,7 +147,7 @@ export function AnonymousGpt() {
                                   <Link href="/login"><LogIn className="mr-2"/> User Login</Link>
                                 </Button>
                                  <Button asChild variant="ghost" className="w-full justify-start text-base" onClick={() => setIsSheetOpen(false)}>
-                                  <Link href="/login"><Shield className="mr-2"/> Admin Login</Link>
+                                  <Link href="/login?role=admin"><Shield className="mr-2"/> Admin Login</Link>
                                 </Button>
                                 <Button asChild variant="ghost" className="w-full justify-start text-base" onClick={() => setIsSheetOpen(false)}>
                                   <Link href="/about"><Info className="mr-2"/> About Us</Link>

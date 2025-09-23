@@ -1,7 +1,7 @@
 // src/app/login/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,15 +9,21 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader, LogIn } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/ongwae/logo";
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { verifyLogin } from "@/lib/actions/user";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const role = searchParams.get('role');
+
+  const isAnAdminLogin = role === 'admin';
+  const title = isAnAdminLogin ? "Admin Portal" : "Welcome Back";
+  const description = isAnAdminLogin ? "Sign in to manage OngwaeGPT" : "Sign in to continue to OngwaeGPT";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,8 +67,8 @@ export default function LoginPage() {
           <Link href="/" aria-label="Home">
             <Logo className="h-12 w-12 text-primary" />
           </Link>
-          <h1 className="mt-4 font-headline text-3xl font-bold">Welcome Back</h1>
-          <p className="text-muted-foreground">Sign in to continue to OngwaeGPT</p>
+          <h1 className="mt-4 font-headline text-3xl font-bold">{title}</h1>
+          <p className="text-muted-foreground">{description}</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
@@ -104,5 +110,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginPageContent />
+    </Suspense>
   );
 }
