@@ -1,11 +1,7 @@
 import { config } from 'dotenv';
 config();
 
-import '@/ai/flows/deep-search.ts';
-import '@/ai/flows/quick-response.ts';
-import '@/ai/flows/summarize-text.ts';
-import '@/ai/flows/generate-image.ts';
-import '@/ai/flows/generate-table.ts';
-import '@/ai/flows/code-generation.ts';
-import '@/ai/flows/anonymous-chat.ts';
-import '@/ai/flows/delete-user-data.ts';
+// The direct imports of flows have been removed from this file.
+// They are loaded on-demand by the application, which resolves a
+// critical race condition with the database connection during startup.
+// This was the root cause of the signup and login failures.
