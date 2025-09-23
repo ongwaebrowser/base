@@ -1,4 +1,3 @@
-
 // src/components/page-layout.tsx
 import Link from 'next/link';
 import { Logo } from './ongwae/logo';
@@ -13,8 +12,8 @@ interface PageLayoutProps {
 
 export function PageLayout({ title, description, children }: PageLayoutProps) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-sm">
+    <div className="min-h-screen bg-transparent text-foreground">
+      <header className="sticky top-0 z-10 border-b bg-slate-950/80 backdrop-blur-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
             <Logo className="h-8 w-8 text-primary" />

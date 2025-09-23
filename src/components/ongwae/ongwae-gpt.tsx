@@ -20,6 +20,8 @@ import { addMessageToChat, createChat, deleteChat } from "@/lib/actions/chat";
 import { deleteUserAccount } from "@/lib/actions/user";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { useRouter } from 'next/navigation';
+import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
+import { cn } from "@/lib/utils";
 
 const TYPING_SPEED_MS = 15;
 
@@ -271,7 +273,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
     <TooltipProvider>
       <div className="flex h-screen flex-col bg-transparent text-foreground">
         
-        <aside className="hidden md:flex fixed top-0 left-0 h-full w-64 flex-col border-r bg-background/80 backdrop-blur-sm p-4 z-10">
+        <aside className="hidden md:flex fixed top-0 left-0 h-full w-72 flex-col border-r bg-slate-950/80 backdrop-blur-sm p-4 z-10">
           <ChatSidebarContent
             user={user}
             chats={chats}
@@ -284,102 +286,100 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
           />
         </aside>
 
-        <div className="flex h-full flex-col md:pl-64">
-          <header className="flex items-center justify-between border-b p-4 sticky top-0 z-0 bg-background/50 backdrop-blur-sm">
-            <div className="flex items-center gap-3">
-              <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-                <SheetTrigger asChild className="md:hidden">
-                  <Button variant="ghost" size="icon">
-                    <PanelLeft />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-72 p-0 bg-background/80 backdrop-blur-sm">
-                  <ChatSidebarContent
-                    user={user}
-                    chats={chats}
-                    activeChatId={activeChat?._id.toString()}
-                    onNewChat={handleCreateNewChat}
-                    onSelectChat={handleSelectChat}
-                    onDeleteChat={(id) => setItemToDelete(id)}
-                    onDeleteAccount={() => setIsDeleteAccountConfirmOpen(true)}
-                    onLogout={handleLogout}
-                    isSheet
-                  />
-                </SheetContent>
-              </Sheet>
-              
-              <div className="flex items-center gap-2">
-                 <Logo className="h-8 w-8 text-primary" />
-                 <div>
-                  <h1 className="font-headline text-xl font-bold">OngwaeGPT</h1>
-                  <p className="text-xs text-muted-foreground truncate max-w-[150px] sm:max-w-xs">{getPageTitle()}</p>
-                 </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
-                    <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                    <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    <span className="sr-only">Toggle theme</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Toggle Theme</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </header>
-
-          <main className="flex-1 overflow-y-auto p-4 pb-32">
-            <div className="mx-auto max-w-4xl space-y-8">
-              {messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
-          </main>
-
-          <footer className="fixed bottom-0 right-0 border-t bg-background/50 backdrop-blur-sm md:left-64">
-            <div className="mx-auto max-w-4xl p-4">
-              <form onSubmit={handleSubmit} className="relative">
-                <Input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask OngwaeGPT anything..."
-                  className="h-12 w-full rounded-full border-2 border-primary/20 bg-card/80 py-3 pl-5 pr-28 text-base shadow-lg focus:border-primary/60 focus:ring-4 focus:ring-primary/20"
-                  disabled={isLoading}
-                />
-                <Button
-                  type="submit"
-                  size="icon"
-                  className="absolute right-4 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full"
-                  disabled={isLoading || !input.trim()}
-                >
-                  {isLoading ? <Loader className="animate-spin" /> : <ArrowUp />}
-                  <span className="sr-only">Send</span>
-                </Button>
-              </form>
-              <div className="mt-3 flex flex-col items-center justify-center gap-2 sm:flex-row sm:justify-between">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="deep-search-mode"
-                    checked={isDeepSearch}
-                    onCheckedChange={setIsDeepSearch}
-                    disabled={isLoading}
-                  />
-                  <Label htmlFor="deep-search-mode" className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Zap className={`h-4 w-4 transition-colors ${isDeepSearch ? 'text-primary' : ''}`} />
-                    {isDeepSearch ? "Deep Search" : "Quick Response"}
-                  </Label>
-                </div>
-                 <p className="text-center text-[10px] text-muted-foreground">
-                  OngwaeGPT can make mistakes. Consider checking important information.
-                </p>
-              </div>
-            </div>
-          </footer>
+        <div className="flex h-full flex-col md:pl-72">
+            <Card className="flex h-full flex-col bg-card/60 backdrop-blur-sm m-4 rounded-xl">
+                <CardHeader className="flex flex-row items-center justify-between border-b">
+                    <div className="flex items-center gap-3">
+                    <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+                        <SheetTrigger asChild className="md:hidden">
+                        <Button variant="ghost" size="icon">
+                            <PanelLeft />
+                        </Button>
+                        </SheetTrigger>
+                        <SheetContent side="left" className="w-72 p-0 bg-slate-950/80 backdrop-blur-sm">
+                        <ChatSidebarContent
+                            user={user}
+                            chats={chats}
+                            activeChatId={activeChat?._id.toString()}
+                            onNewChat={handleCreateNewChat}
+                            onSelectChat={handleSelectChat}
+                            onDeleteChat={(id) => setItemToDelete(id)}
+                            onDeleteAccount={() => setIsDeleteAccountConfirmOpen(true)}
+                            onLogout={handleLogout}
+                            isSheet
+                        />
+                        </SheetContent>
+                    </Sheet>
+                    
+                    <div className="flex items-center gap-2">
+                        <Logo className="h-8 w-8 text-primary" />
+                        <div>
+                        <h1 className="font-headline text-xl font-bold">OngwaeGPT</h1>
+                        <p className="text-xs text-muted-foreground truncate max-w-[150px] sm:max-w-xs">{getPageTitle()}</p>
+                        </div>
+                    </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+                            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                            <span className="sr-only">Toggle theme</span>
+                        </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                        <p>Toggle Theme</p>
+                        </TooltipContent>
+                    </Tooltip>
+                    </div>
+                </CardHeader>
+                <CardContent className="flex-1 overflow-y-auto p-4">
+                    <div className="mx-auto max-w-4xl space-y-8">
+                    {messages.map((message) => (
+                        <ChatMessage key={message.id} message={message} />
+                    ))}
+                    <div ref={messagesEndRef} />
+                    </div>
+                </CardContent>
+                <CardFooter className="flex-col items-start gap-2 border-t p-4">
+                    <form onSubmit={handleSubmit} className="relative w-full">
+                        <Input
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder="Ask OngwaeGPT anything..."
+                        className="h-12 w-full rounded-full bg-secondary/50 py-3 pl-5 pr-28 text-base shadow-inner"
+                        disabled={isLoading}
+                        />
+                        <Button
+                        type="submit"
+                        size="icon"
+                        className="absolute right-4 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full"
+                        disabled={isLoading || !input.trim()}
+                        >
+                        {isLoading ? <Loader className="animate-spin" /> : <ArrowUp />}
+                        <span className="sr-only">Send</span>
+                        </Button>
+                    </form>
+                    <div className="flex w-full items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                        <Switch
+                            id="deep-search-mode"
+                            checked={isDeepSearch}
+                            onCheckedChange={setIsDeepSearch}
+                            disabled={isLoading}
+                        />
+                        <Label htmlFor="deep-search-mode" className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Zap className={cn('h-4 w-4 transition-colors', isDeepSearch ? 'text-primary' : '')} />
+                            {isDeepSearch ? "Deep Search" : "Quick Response"}
+                        </Label>
+                        </div>
+                        <p className="text-center text-[10px] text-muted-foreground">
+                        OngwaeGPT can make mistakes. Consider checking important information.
+                        </p>
+                    </div>
+                </CardFooter>
+            </Card>
         </div>
 
         <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
@@ -435,7 +435,7 @@ function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat
        <div className="flex items-center justify-between border-b p-4">
           <div className="flex items-center gap-3">
             <Logo className="h-8 w-8 text-primary" />
-            <h1 className="font-headline text-xl font-bold">Chats</h1>
+            <h1 className="font-headline text-xl font-bold">My Chats</h1>
           </div>
           {isSheet && (
             <SheetTrigger asChild>
@@ -456,7 +456,7 @@ function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat
           {chats.map(chat => (
             <li key={chat._id.toString()}>
               <div
-                className={`group flex items-center justify-between rounded-md p-2 text-sm font-medium cursor-pointer transition-colors ${activeChatId === chat._id.toString() ? 'bg-primary/20 text-primary' : 'hover:bg-muted'}`}
+                className={cn(`group flex items-center justify-between rounded-md p-2 text-sm font-medium cursor-pointer transition-colors`, activeChatId === chat._id.toString() ? 'bg-primary/20 text-primary' : 'hover:bg-muted/50')}
                 onClick={() => onSelectChat(chat._id.toString())}
               >
                 <span className="truncate flex-1">{chat.title}</span>
@@ -479,7 +479,7 @@ function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat
         </ul>
       </nav>
       <div className="border-t p-4">
-         <div className="text-sm p-2 mb-2">
+         <div className="text-sm p-2 mb-2 rounded-md bg-muted/50">
            <p className="font-semibold">{user.name}</p>
          </div>
          <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:bg-destructive/10 hover:text-destructive" onClick={onDeleteAccount}>

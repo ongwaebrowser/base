@@ -11,16 +11,16 @@ import type { Message } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
 import { Logo } from "./logo";
-import { useRouter } from 'next/navigation';
 import { anonymousChat } from "@/ai/flows/anonymous-chat";
 import Link from "next/link";
+import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 
 const TYPING_SPEED_MS = 25;
 
 const INITIAL_MESSAGE: Message = {
   id: "1",
   role: "model",
-  content: "Hello! I'm OngwaeGPT. Ask me anything to see how I work. Sign up to save your chats.",
+  content: "Hello! I'm OngwaeGPT. Ask me anything to see how I work. Sign up to save your chats and unlock more features.",
   isStreaming: false,
 };
 
@@ -32,7 +32,6 @@ export function AnonymousGpt() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
-  const router = useRouter();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -122,77 +121,75 @@ export function AnonymousGpt() {
 
   return (
     <TooltipProvider>
-      <div className="flex h-screen flex-col bg-background text-foreground">
-        <div className="flex h-full flex-col">
-          <header className="flex items-center justify-between border-b p-4">
-            <div className="flex items-center gap-2">
-               <Logo className="h-8 w-8 text-primary" />
-               <div>
-                <h1 className="font-headline text-xl font-bold">OngwaeGPT AI</h1>
-                <p className="text-xs text-muted-foreground">Anonymous Chat</p>
-               </div>
-            </div>
-            <div className="flex items-center gap-2">
-                <Button asChild variant="secondary">
-                  <Link href="/login">Login</Link>
-                </Button>
-                <Button asChild>
-                   <Link href="/signup">Sign Up</Link>
-                </Button>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
-                    <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                    <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    <span className="sr-only">Toggle theme</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Toggle Theme</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </header>
-
-          <main className="flex-1 overflow-y-auto p-4 pb-48">
-            <div className="mx-auto max-w-4xl space-y-8">
-              {messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
-          </main>
-
-          <footer className="fixed bottom-0 right-0 left-0 border-t bg-background/80 backdrop-blur-sm">
-            <div className="mx-auto max-w-4xl p-4">
-              <form onSubmit={handleSubmit} className="relative">
-                <Input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask a question to try OngwaeGPT..."
-                  className="h-12 w-full rounded-full bg-card py-3 pl-5 pr-28 text-base shadow-lg"
-                  disabled={isLoading}
-                />
-                <Button
-                  type="submit"
-                  size="icon"
-                  className="absolute right-4 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full"
-                  disabled={isLoading || !input.trim()}
-                >
-                  {isLoading ? <Loader className="animate-spin" /> : <ArrowUp />}
-                  <span className="sr-only">Send</span>
-                </Button>
-              </form>
-               <p className="mt-3 text-center text-[10px] text-muted-foreground">
-                OngwaeGPT can make mistakes. Consider checking important information.
-              </p>
-              <div className="mt-2 flex justify-center gap-4 text-xs text-muted-foreground">
+      <div className="flex h-screen w-full items-center justify-center bg-transparent p-4">
+        <div className="flex h-full max-h-[700px] w-full max-w-4xl flex-col">
+            <Card className="flex h-full flex-col bg-card/80 backdrop-blur-sm">
+                <CardHeader className="flex flex-row items-center justify-between border-b">
+                    <div className="flex items-center gap-2">
+                        <Logo className="h-8 w-8 text-primary" />
+                        <div>
+                            <h1 className="font-headline text-xl font-bold">OngwaeGPT AI</h1>
+                            <p className="text-xs text-muted-foreground">Anonymous Chat</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button asChild variant="secondary">
+                        <Link href="/login">Login</Link>
+                        </Button>
+                        <Button asChild>
+                        <Link href="/signup">Sign Up</Link>
+                        </Button>
+                        <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+                                <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                                <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                                <span className="sr-only">Toggle theme</span>
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Toggle Theme</p>
+                        </TooltipContent>
+                        </Tooltip>
+                    </div>
+                </CardHeader>
+                <CardContent className="flex-1 overflow-y-auto p-4">
+                    <div className="space-y-8">
+                    {messages.map((message) => (
+                        <ChatMessage key={message.id} message={message} />
+                    ))}
+                    <div ref={messagesEndRef} />
+                    </div>
+                </CardContent>
+                <CardFooter className="flex-col items-start gap-2 border-t p-4">
+                    <form onSubmit={handleSubmit} className="relative w-full">
+                        <Input
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder="Ask a question to try OngwaeGPT..."
+                        className="h-12 w-full rounded-full bg-secondary/50 py-3 pl-5 pr-28 text-base shadow-inner"
+                        disabled={isLoading}
+                        />
+                        <Button
+                        type="submit"
+                        size="icon"
+                        className="absolute right-4 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full"
+                        disabled={isLoading || !input.trim()}
+                        >
+                        {isLoading ? <Loader className="animate-spin" /> : <ArrowUp />}
+                        <span className="sr-only">Send</span>
+                        </Button>
+                    </form>
+                    <p className="w-full text-center text-[10px] text-muted-foreground">
+                        OngwaeGPT can make mistakes. Consider checking important information.
+                    </p>
+                </CardFooter>
+            </Card>
+             <div className="mt-4 flex justify-center gap-4 text-xs text-muted-foreground">
                 <Link href="/about" className="hover:text-primary">About</Link>
                 <Link href="/terms" className="hover:text-primary">Terms</Link>
                 <Link href="/privacy" className="hover:text-primary">Privacy</Link>
               </div>
-            </div>
-          </footer>
         </div>
       </div>
     </TooltipProvider>
