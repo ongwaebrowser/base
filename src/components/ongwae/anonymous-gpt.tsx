@@ -5,7 +5,7 @@ import { useState, useRef, useEffect, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ArrowUp, Loader, Moon, Sun } from "lucide-react";
+import { ArrowUp, Loader, Moon, Sun, Menu, LogIn, Shield, Info, FileText, X } from "lucide-react";
 import { ChatMessage } from "./chat-message";
 import type { Message } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +14,7 @@ import { Logo } from "./logo";
 import { anonymousChat } from "@/ai/flows/anonymous-chat";
 import Link from "next/link";
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 
 const TYPING_SPEED_MS = 25;
 
@@ -28,6 +29,7 @@ export function AnonymousGpt() {
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -126,10 +128,42 @@ export function AnonymousGpt() {
             <Card className="flex h-full flex-col bg-card/80 backdrop-blur-sm">
                 <CardHeader className="flex flex-row items-center justify-between border-b">
                     <div className="flex items-center gap-2">
-                        <Logo className="h-8 w-8 text-primary" />
-                        <div>
-                            <h1 className="font-headline text-xl font-bold">OngwaeGPT AI</h1>
-                            <p className="text-xs text-muted-foreground">Anonymous Chat</p>
+                        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                          <SheetTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <Menu className="h-5 w-5" />
+                              <span className="sr-only">Open Menu</span>
+                            </Button>
+                          </SheetTrigger>
+                          <SheetContent side="left" className="w-72 p-0 bg-slate-950/80 backdrop-blur-sm">
+                              <SheetHeader className="flex flex-row items-center justify-between border-b p-4">
+                                <SheetTitle className="flex items-center gap-2 font-headline text-xl">
+                                  <Logo className="h-6 w-6 text-primary"/>
+                                  Menu
+                                </SheetTitle>
+                              </SheetHeader>
+                              <nav className="p-4 space-y-2">
+                                <Button asChild variant="ghost" className="w-full justify-start text-base" onClick={() => setIsSheetOpen(false)}>
+                                  <Link href="/login"><LogIn className="mr-2"/> User Login</Link>
+                                </Button>
+                                 <Button asChild variant="ghost" className="w-full justify-start text-base" onClick={() => setIsSheetOpen(false)}>
+                                  <Link href="/login"><Shield className="mr-2"/> Admin Login</Link>
+                                </Button>
+                                <Button asChild variant="ghost" className="w-full justify-start text-base" onClick={() => setIsSheetOpen(false)}>
+                                  <Link href="/about"><Info className="mr-2"/> About Us</Link>
+                                </Button>
+                                <Button asChild variant="ghost" className="w-full justify-start text-base" onClick={() => setIsSheetOpen(false)}>
+                                  <Link href="/terms"><FileText className="mr-2"/> Terms of Service</Link>
+                                </Button>
+                              </nav>
+                          </SheetContent>
+                        </Sheet>
+                        <div className="flex items-center gap-2">
+                            <Logo className="h-8 w-8 text-primary" />
+                            <div>
+                                <h1 className="font-headline text-xl font-bold">OngwaeGPT AI</h1>
+                                <p className="text-xs text-muted-foreground">Anonymous Chat</p>
+                            </div>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
