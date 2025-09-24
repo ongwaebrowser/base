@@ -7,7 +7,6 @@ export async function middleware(request: NextRequest) {
     try {
       session = JSON.parse(sessionCookie.value);
     } catch(e) {
-      // Invalid session cookie, delete it and proceed as unauthenticated
       const response = NextResponse.redirect(new URL('/login', request.url));
       response.cookies.delete('session');
       return response;
@@ -18,8 +17,12 @@ export async function middleware(request: NextRequest) {
   const isPublicPage = ['/about', '/terms', '/privacy', '/login', '/signup'].some(page => pathname.startsWith(page));
   const isHomePage = pathname === '/';
 
-  // If a logged-in user tries to access a public page or the home page, redirect them.
-  if (session && (isPublicPage || isHomePage)) {
+  // If a logged-in user tries to access a public page (like login) or the home page, redirect them.
+  // We exclude this check if the 'referer' is the login page itself, which prevents a redirect loop immediately after login.
+  const referer = request.headers.get('referer');
+  const isImmediatelyAfterLogin = referer && (new URL(referer).pathname === '/login');
+
+  if (session && (isPublicPage || isHomePage) && !isImmediatelyAfterLogin) {
     const redirectUrl = session.role === 'admin' ? '/admin' : '/chat';
     return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
