@@ -1,4 +1,3 @@
-
 // src/lib/actions/user.ts
 "use server";
 
@@ -51,6 +50,7 @@ export async function createUser(userData: z.infer<typeof CreateUserSchema>) {
       return { success: false, message: "A user with this email already exists." };
     }
     
+    // The first user to sign up becomes the admin
     const adminExists = await findAdmin();
     const role = adminExists ? "user" : "admin";
 
@@ -120,6 +120,7 @@ export async function findUserByEmail(email: string): Promise<User | null> {
     const db = client.db("ongwaegpt");
     const user = await db.collection<User>("users").findOne({ email });
     
+    // Check for expired subscription
     if (user && user.subscription?.tier === 'premium' && user.subscription.expiresAt && user.subscription.expiresAt < new Date()) {
       // Subscription expired, revert to free
       const usersCollection = db.collection<User>("users");
@@ -132,7 +133,10 @@ export async function findUserByEmail(email: string): Promise<User | null> {
           'subscription.expiresAt': ""
         }
       });
+      // Update user object for the current session
       user.subscription.tier = 'free';
+      user.subscription.paymentStatus = 'none';
+      delete user.subscription.expiresAt;
     }
 
     return user;
@@ -146,7 +150,8 @@ export async function getAllUsers(): Promise<User[]> {
   try {
     const client = await clientPromise;
     const db = client.db("ongwaegpt");
-    const users = await db.collection<User>("users").find({}, { projection: { password: 0 } }).sort({ createdAt: -1 }).toArray(); // Exclude passwords
+    // Exclude passwords and sort by creation date
+    const users = await db.collection<User>("users").find({}, { projection: { password: 0 } }).sort({ createdAt: -1 }).toArray();
     return JSON.parse(JSON.stringify(users));
   } catch (error) {
     console.error("Error fetching all users:", error);
@@ -161,6 +166,7 @@ export async function deleteUserAccount() {
   }
 
   try {
+    // This flow handles deleting the user and their chats
     await deleteUserDataFlow({ userId: session.userId });
     await logout(); // Log the user out after deleting their data.
     revalidatePath("/");
@@ -235,10 +241,10 @@ export async function getSession(): Promise<(User & { userId: string }) | null> 
   if (sessionCookie) {
     try {
       const session = JSON.parse(sessionCookie.value);
-      // Basic check for expired subscription on session load
+      // Re-verify subscription status on session load to catch expirations
       if (session.subscription?.tier === 'premium' && session.subscription.expiresAt && new Date(session.subscription.expiresAt) < new Date()) {
         session.subscription.tier = 'free';
-        // Re-save session with updated tier
+        // Re-save session with updated tier to reflect immediately in the UI
         await createSession(session);
       }
       return session;

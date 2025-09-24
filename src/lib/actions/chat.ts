@@ -6,7 +6,7 @@ import { Message, Chat } from "@/lib/types";
 import { ObjectId } from "mongodb";
 import { revalidatePath } from "next/cache";
 
-const MAX_MESSAGES = 200;
+const MAX_MESSAGES = 200; // Limit conversations to 200 messages
 
 export async function getChatsForUser(userId: string): Promise<Chat[]> {
   try {
@@ -19,7 +19,6 @@ export async function getChatsForUser(userId: string): Promise<Chat[]> {
       .sort({ createdAt: -1 })
       .toArray();
     
-    // Convert ObjectId to string for client-side usage
     return JSON.parse(JSON.stringify(chats));
   } catch (error) {
     console.error("Error fetching chats:", error);
@@ -45,7 +44,7 @@ export async function getChatById(chatId: string): Promise<Chat | null> {
 }
 
 
-export async function createChat(userId: string, firstMessage?: string): Promise<Chat | null> {
+export async function createChat(userId: string, firstMessage: string): Promise<Chat | null> {
   try {
     const client = await clientPromise;
     const db = client.db("ongwaegpt");
@@ -53,15 +52,16 @@ export async function createChat(userId: string, firstMessage?: string): Promise
 
     const newChat: Omit<Chat, '_id'> = {
       userId: new ObjectId(userId),
-      title: firstMessage ? firstMessage.substring(0, 30) : "New Chat",
+      title: firstMessage.substring(0, 30), // Use first message as title
       messages: [],
       createdAt: new Date(),
     };
 
     const result = await chatsCollection.insertOne(newChat as Chat);
     
-    revalidatePath("/");
-    revalidatePath(`/chat/[chatId]`);
+    // Revalidate paths to update UI
+    revalidatePath("/chat");
+    revalidatePath(`/chat/${result.insertedId}`);
 
     const createdChat = await chatsCollection.findOne({ _id: result.insertedId });
     return createdChat ? JSON.parse(JSON.stringify(createdChat)) : null;
@@ -78,13 +78,14 @@ export async function addMessageToChat(chatId: string, message: Message) {
     const db = client.db("ongwaegpt");
     const chatsCollection = db.collection<Chat>("chats");
     
+    // Push the new message and slice the array to keep only the last N messages
     const result = await chatsCollection.updateOne(
         { _id: new ObjectId(chatId) },
         { 
             $push: { 
                 messages: {
                     $each: [message],
-                    $slice: -MAX_MESSAGES // Keep only the last 200 messages
+                    $slice: -MAX_MESSAGES 
                 }
             } 
         }
@@ -106,8 +107,8 @@ export async function deleteChat(chatId: string) {
 
         const result = await chatsCollection.deleteOne({ _id: new ObjectId(chatId) });
 
-        revalidatePath("/");
-        revalidatePath(`/chat/[chatId]`);
+        revalidatePath("/chat");
+        revalidatePath(`/chat/${chatId}`);
         
         return result.deletedCount > 0;
     } catch (error) {

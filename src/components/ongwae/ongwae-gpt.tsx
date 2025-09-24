@@ -63,6 +63,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
     setChats(initialChats);
   }, [initialActiveChat, initialChats]);
 
+  // Disable deep search if user is not premium
   useEffect(() => {
     if (!isPremium) {
       setIsDeepSearch(false);
@@ -101,6 +102,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
       setChats(updatedChats);
       toast({ title: 'Chat Deleted' });
       
+      // If the active chat was deleted, redirect to the base chat page
       if (activeChat?._id.toString() === itemToDelete) {
         router.push('/chat');
       }
@@ -115,6 +117,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
       const result = await deleteUserAccount();
       if (result.success) {
         toast({ title: "Account Deleted", description: "Your account and data have been permanently removed." });
+        // The server action handles logging out and redirecting.
         await handleLogout();
       } else {
         toast({ variant: "destructive", title: "Deletion Failed", description: result.message });
@@ -137,6 +140,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
     let currentChatId = activeChat?._id.toString();
     let isNewChat = !currentChatId;
 
+    // Create a new chat in the DB if it's the first message
     if (isNewChat) {
       try {
         const newChat = await createChat(user.userId, input);
@@ -144,6 +148,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
           setChats(prev => [newChat, ...prev]);
           setActiveChat(newChat);
           currentChatId = newChat._id.toString();
+          // Update the URL without a full page reload
           router.replace(`/chat/${currentChatId}`, { scroll: false });
         } else {
           throw new Error("Failed to create new chat.");
@@ -151,14 +156,17 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
       } catch (error) {
         toast({ variant: "destructive", title: "Could not start a new chat." });
         setIsLoading(false);
+        // Rollback optimistic UI update
         setMessages(prev => prev.slice(0, -1));
         return;
       }
     }
     
+    // Add the user message to the (now existing) chat
     if (currentChatId) {
       await addMessageToChat(currentChatId, userMessage);
        if (isNewChat) {
+          // Update the title of the new chat in the UI
           const updatedChats = chats.map(c => c._id.toString() === currentChatId ? {...c, title: input.substring(0, 30)} : c);
           if(!updatedChats.find(c => c._id.toString() === currentChatId)) {
             const newChat = activeChat ? {...activeChat, title: input.substring(0, 30)} : null;
@@ -180,9 +188,10 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
 
     try {
       const historyForAI = [...(activeChat?.messages || []), userMessage]
-        .slice(0, -1) 
-        .filter(msg => msg.content) 
+        .slice(0, -1) // Don't include the user's latest message in history, it's in the query
+        .filter(msg => msg.content) // Filter out any empty messages
         .map(({ role, content, type }) => {
+          // Simplify image messages for the AI's context
           if (type === 'image') {
             return { role, content: '[An image was generated]' };
           }
@@ -222,6 +231,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
       if (result.isImage) {
         setIsLoading(false);
       } else {
+        // Simulate typing animation
         const typingDuration = result.response.length * TYPING_SPEED_MS;
         setTimeout(() => {
           setMessages((prev) =>
@@ -236,6 +246,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
       console.error("AI Error:", error);
       let errorMessageContent = "Sorry, I encountered an error. Please try again.";
 
+      // Provide more specific feedback to the user based on the error
        if (error instanceof Error) {
         if (error.message.includes('The input token count')) {
           errorMessageContent = "Sorry, the conversation history is too long. Please start a new chat.";
@@ -258,6 +269,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
           isLoading: false
       };
       
+      // Update UI with error message
       setMessages((prev) => prev.map((msg) => msg.id === assistantMessageId ? errorAssistantMessage : msg));
       if(currentChatId) {
         addMessageToChat(currentChatId, errorAssistantMessage);
@@ -282,6 +294,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
     <TooltipProvider>
       <div className="flex h-screen flex-col bg-transparent text-foreground">
         
+        {/* Persistent Sidebar for Desktop */}
         <aside className="hidden md:flex fixed top-0 left-0 h-full w-72 flex-col border-r bg-slate-950/80 backdrop-blur-sm p-4 z-10">
           <ChatSidebarContent
             user={user}
@@ -296,10 +309,12 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
           />
         </aside>
 
+        {/* Main Content Area */}
         <div className="flex h-full flex-col md:pl-72">
             <Card className="flex h-full flex-col bg-card/60 backdrop-blur-sm m-2 sm:m-4 rounded-xl">
                 <CardHeader className="flex flex-row items-center justify-between border-b">
                     <div className="flex items-center gap-3">
+                    {/* Mobile Sidebar Toggle */}
                     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                         <SheetTrigger asChild className="md:hidden">
                         <Button variant="ghost" size="icon">
@@ -399,6 +414,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
             </Card>
         </div>
 
+        {/* Confirmation Dialogs */}
         <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -478,6 +494,7 @@ function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat
         )}
       </div>
       <nav className="flex-1 overflow-y-auto px-4">
+        <p className="px-2 py-1 text-xs font-semibold text-muted-foreground">History</p>
         <ul className="space-y-1">
           {chats.map(chat => (
             <li key={chat._id.toString()}>
@@ -504,9 +521,10 @@ function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat
           ))}
         </ul>
       </nav>
+      {/* User profile section */}
       <div className="border-t p-4">
          <div className="text-sm p-2 mb-2 rounded-md bg-muted/50 flex items-center justify-between">
-           <p className="font-semibold">{user.name}</p>
+           <p className="font-semibold truncate">{user.name}</p>
            {isPremium && (
              <Tooltip>
                <TooltipTrigger>
