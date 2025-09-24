@@ -5,7 +5,7 @@ import { useState, useRef, useEffect, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ArrowUp, Loader, Moon, Sun, Menu, LogIn, Shield, Info, FileText, X } from "lucide-react";
+import { ArrowUp, Loader, Moon, Sun, Menu, LogIn, Shield, Info, FileText } from "lucide-react";
 import { ChatMessage } from "./chat-message";
 import type { Message } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
@@ -123,10 +123,10 @@ export function AnonymousGpt() {
 
   return (
     <TooltipProvider>
-      <div className="flex h-screen w-full items-center justify-center bg-transparent p-4">
+      <div className="flex h-screen w-full items-center justify-center bg-transparent p-2 sm:p-4">
         <div className="flex h-full max-h-[700px] w-full max-w-4xl flex-col">
             <Card className="flex h-full flex-col bg-card/80 backdrop-blur-sm">
-                <CardHeader className="flex flex-row items-center justify-between border-b">
+                <CardHeader className="flex flex-row items-center justify-between border-b px-4">
                     <div className="flex items-center gap-2">
                         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                           <SheetTrigger asChild>
@@ -166,12 +166,12 @@ export function AnonymousGpt() {
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Button asChild variant="secondary">
-                        <Link href="/login">Login</Link>
+                    <div className="flex items-center gap-1 sm:gap-2">
+                        <Button asChild variant="secondary" size="sm">
+                          <Link href="/login">Login</Link>
                         </Button>
-                        <Button asChild>
-                        <Link href="/signup">Sign Up</Link>
+                        <Button asChild size="sm">
+                          <Link href="/signup">Sign Up</Link>
                         </Button>
                         <Tooltip>
                         <TooltipTrigger asChild>

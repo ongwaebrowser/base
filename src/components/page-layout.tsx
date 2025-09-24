@@ -29,7 +29,7 @@ export function PageLayout({ title, description, children }: PageLayoutProps) {
       </header>
       <main className="container mx-auto max-w-4xl px-4 py-8 md:py-12">
         <div className="mb-8 border-b pb-4">
-          <h1 className="font-headline text-4xl font-bold">{title}</h1>
+          <h1 className="font-headline text-3xl md:text-4xl font-bold">{title}</h1>
           <p className="mt-2 text-muted-foreground">{description}</p>
         </div>
         <article className="prose prose-lg dark:prose-invert max-w-none">

@@ -287,7 +287,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
         </aside>
 
         <div className="flex h-full flex-col md:pl-72">
-            <Card className="flex h-full flex-col bg-card/60 backdrop-blur-sm m-4 rounded-xl">
+            <Card className="flex h-full flex-col bg-card/60 backdrop-blur-sm m-2 sm:m-4 rounded-xl">
                 <CardHeader className="flex flex-row items-center justify-between border-b">
                     <div className="flex items-center gap-3">
                     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
@@ -361,7 +361,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
                         <span className="sr-only">Send</span>
                         </Button>
                     </form>
-                    <div className="flex w-full items-center justify-between">
+                    <div className="flex w-full flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                         <div className="flex items-center space-x-2">
                         <Switch
                             id="deep-search-mode"
@@ -369,12 +369,12 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
                             onCheckedChange={setIsDeepSearch}
                             disabled={isLoading}
                         />
-                        <Label htmlFor="deep-search-mode" className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Label htmlFor="deep-search-mode" className="flex items-center gap-1.5 text-xs text-muted-foreground whitespace-nowrap">
                             <Zap className={cn('h-4 w-4 transition-colors', isDeepSearch ? 'text-primary' : '')} />
                             {isDeepSearch ? "Deep Search" : "Quick Response"}
                         </Label>
                         </div>
-                        <p className="text-center text-[10px] text-muted-foreground">
+                        <p className="w-full text-center text-[10px] text-muted-foreground sm:text-right">
                         OngwaeGPT can make mistakes. Consider checking important information.
                         </p>
                     </div>
