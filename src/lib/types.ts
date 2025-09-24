@@ -1,3 +1,4 @@
+
 import type { ObjectId } from "mongodb";
 
 export interface Message {
@@ -24,4 +25,9 @@ export interface User {
   password?: string; // Optional because we'll exclude it when sending to client
   role: 'admin' | 'user';
   createdAt: Date;
+  subscription?: {
+    tier: 'free' | 'premium';
+    expiresAt?: Date;
+    paymentStatus: 'none' | 'pending' | 'paid';
+  }
 }

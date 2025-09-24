@@ -8,9 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { ArrowUp, Loader, Zap, Moon, Sun, MessageSquarePlus, Trash2, LogOut, PanelLeft, X, UserX } from "lucide-react";
+import { ArrowUp, Loader, Zap, Moon, Sun, MessageSquarePlus, Trash2, LogOut, PanelLeft, X, UserX, Crown } from "lucide-react";
 import { ChatMessage } from "./chat-message";
-import type { Message, Chat } from "@/lib/types";
+import type { Message, Chat, User } from "@/lib/types";
 import { deepSearch } from "@/ai/flows/deep-search";
 import { quickResponse } from "@/ai/flows/quick-response";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,7 @@ import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 const TYPING_SPEED_MS = 15;
 
@@ -33,7 +34,7 @@ const INITIAL_MESSAGE: Message = {
 };
 
 interface OngwaeGptProps {
-  user: { userId: string; name: string };
+  user: User & { userId: string };
   initialChats: Chat[];
   initialActiveChat: Chat | null;
 }
@@ -48,7 +49,8 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [isDeleteAccountConfirmOpen, setIsDeleteAccountConfirmOpen] = useState(false);
-
+  
+  const isPremium = user.subscription?.tier === 'premium';
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -60,6 +62,12 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
     setMessages(initialActiveChat?.messages.length ? initialActiveChat.messages : [INITIAL_MESSAGE]);
     setChats(initialChats);
   }, [initialActiveChat, initialChats]);
+
+  useEffect(() => {
+    if (!isPremium) {
+      setIsDeepSearch(false);
+    }
+  }, [isPremium]);
 
 
   const scrollToBottom = () => {
@@ -185,7 +193,9 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
         ? { history: historyForAI, query: input }
         : { query: input };
 
-      const aiCall = isDeepSearch
+      const useDeepSearch = isPremium && isDeepSearch;
+
+      const aiCall = useDeepSearch
         ? deepSearch(aiCallPayload)
         : quickResponse(aiCallPayload);
 
@@ -259,7 +269,6 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
   const handleLogout = async () => {
     await logout();
     router.push('/');
-    router.refresh();
   };
   
   const getPageTitle = () => {
@@ -283,6 +292,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
             onDeleteChat={(id) => setItemToDelete(id)}
             onDeleteAccount={() => setIsDeleteAccountConfirmOpen(true)}
             onLogout={handleLogout}
+            isPremium={isPremium}
           />
         </aside>
 
@@ -306,6 +316,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
                             onDeleteChat={(id) => setItemToDelete(id)}
                             onDeleteAccount={() => setIsDeleteAccountConfirmOpen(true)}
                             onLogout={handleLogout}
+                            isPremium={isPremium}
                             isSheet
                         />
                         </SheetContent>
@@ -362,18 +373,24 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
                         </Button>
                     </form>
                     <div className="flex w-full flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
-                        <div className="flex items-center space-x-2">
-                        <Switch
-                            id="deep-search-mode"
-                            checked={isDeepSearch}
-                            onCheckedChange={setIsDeepSearch}
-                            disabled={isLoading}
-                        />
-                        <Label htmlFor="deep-search-mode" className="flex items-center gap-1.5 text-xs text-muted-foreground whitespace-nowrap">
-                            <Zap className={cn('h-4 w-4 transition-colors', isDeepSearch ? 'text-primary' : '')} />
-                            {isDeepSearch ? "Deep Search" : "Quick Response"}
-                        </Label>
-                        </div>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex items-center space-x-2">
+                            <Switch
+                                id="deep-search-mode"
+                                checked={isDeepSearch}
+                                onCheckedChange={setIsDeepSearch}
+                                disabled={isLoading || !isPremium}
+                            />
+                            <Label htmlFor="deep-search-mode" className={cn("flex items-center gap-1.5 text-xs text-muted-foreground whitespace-nowrap", !isPremium && "cursor-not-allowed opacity-50")}>
+                                <Zap className={cn('h-4 w-4 transition-colors', isDeepSearch && isPremium ? 'text-primary' : '')} />
+                                {isDeepSearch && isPremium ? "Deep Search" : "Quick Response"}
+                            </Label>
+                            </div>
+                          </TooltipTrigger>
+                          {!isPremium && <TooltipContent><p>Upgrade to Premium to use Deep Search.</p></TooltipContent>}
+                        </Tooltip>
+
                         <p className="w-full text-center text-[10px] text-muted-foreground sm:text-right">
                         OngwaeGPT can make mistakes. Consider checking important information.
                         </p>
@@ -426,10 +443,11 @@ interface ChatSidebarContentProps {
   onDeleteChat: (id: string) => void;
   onLogout: () => void;
   onDeleteAccount: () => void;
+  isPremium: boolean;
   isSheet?: boolean;
 }
 
-function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat, onDeleteChat, onLogout, onDeleteAccount, isSheet = false}: ChatSidebarContentProps) {
+function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat, onDeleteChat, onLogout, onDeleteAccount, isPremium, isSheet = false}: ChatSidebarContentProps) {
   return (
     <div className="flex h-full flex-col">
        <div className="flex items-center justify-between border-b p-4">
@@ -445,11 +463,19 @@ function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat
             </SheetTrigger>
           )}
         </div>
-      <div className="p-4">
+      <div className="p-4 space-y-2">
         <Button className="w-full" onClick={onNewChat}>
           <MessageSquarePlus className="mr-2" />
           New Chat
         </Button>
+        {!isPremium && (
+          <Button asChild variant="premium" className="w-full">
+            <Link href="/premium">
+              <Crown className="mr-2" />
+              Go Premium
+            </Link>
+          </Button>
+        )}
       </div>
       <nav className="flex-1 overflow-y-auto px-4">
         <ul className="space-y-1">
@@ -479,8 +505,16 @@ function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat
         </ul>
       </nav>
       <div className="border-t p-4">
-         <div className="text-sm p-2 mb-2 rounded-md bg-muted/50">
+         <div className="text-sm p-2 mb-2 rounded-md bg-muted/50 flex items-center justify-between">
            <p className="font-semibold">{user.name}</p>
+           {isPremium && (
+             <Tooltip>
+               <TooltipTrigger>
+                <Crown className="h-5 w-5 text-yellow-500"/>
+               </TooltipTrigger>
+               <TooltipContent><p>Premium User</p></TooltipContent>
+             </Tooltip>
+           )}
          </div>
          <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:bg-destructive/10 hover:text-destructive" onClick={onDeleteAccount}>
            <UserX className="mr-2" />
@@ -494,5 +528,3 @@ function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat
     </div>
   );
 }
-
-    

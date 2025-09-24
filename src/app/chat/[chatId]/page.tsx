@@ -1,3 +1,4 @@
+
 import { OngwaeGpt } from "@/components/ongwae/ongwae-gpt";
 import { getSession } from "@/lib/actions/user";
 import { redirect } from "next/navigation";
@@ -26,7 +27,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
   const initialActiveChat = await getChatById(chatId);
 
   // Ensure the user has access to this chat
-  if (!initialActiveChat || initialActiveChat.userId.toString() !== session.userId) {
+  if (initialActiveChat && initialActiveChat.userId.toString() !== session.userId) {
     return notFound();
   }
   
