@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
 import { Logo } from "./logo";
 import { addMessageToChat, createChat, deleteChat } from "@/lib/actions/chat";
-import { deleteUserAccount } from "@/lib/actions/user";
+import { deleteUserAccount, logout } from "@/lib/actions/user";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
@@ -257,7 +257,7 @@ export function OngwaeGpt({ user, initialChats, initialActiveChat }: OngwaeGptPr
   };
   
   const handleLogout = async () => {
-    await fetch('/api/logout', { method: 'POST' });
+    await logout();
     router.push('/');
     router.refresh();
   };
@@ -494,3 +494,5 @@ function ChatSidebarContent({ user, chats, activeChatId, onNewChat, onSelectChat
     </div>
   );
 }
+
+    
