@@ -15,29 +15,24 @@ export async function middleware(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
-  const publicPages = ['/about', '/terms', '/privacy', '/login', '/signup'];
+  const isPublicPage = ['/about', '/terms', '/privacy', '/login', '/signup'].some(page => pathname.startsWith(page));
+  const isHomePage = pathname === '/';
 
-  const isPublicPage = publicPages.some(page => pathname.startsWith(page));
-
-  // If a logged-in user tries to access the root, login, or signup, redirect them to their dashboard
-  if (session && (pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/signup'))) {
+  // If a logged-in user tries to access a public page or the home page, redirect them.
+  if (session && (isPublicPage || isHomePage)) {
     const redirectUrl = session.role === 'admin' ? '/admin' : '/chat';
     return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
 
   // If an unauthenticated user tries to access a protected page, redirect to login
-  if (!session && pathname !== '/' && !isPublicPage) {
+  if (!session && !isPublicPage && !isHomePage) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
   // Protect the admin route
   if (pathname.startsWith('/admin') && session?.role !== 'admin') {
+    // If a non-admin user tries to access /admin, send them to their chat.
     return NextResponse.redirect(new URL('/chat', request.url));
-  }
-
-  // Allow access to the landing page for anonymous users
-  if (pathname === '/' && !session) {
-    return NextResponse.next();
   }
 
   return NextResponse.next();
