@@ -38,9 +38,12 @@ function LoginPageContent() {
           description: "Redirecting...",
         });
         
-        // Refresh the page to make sure the middleware recognizes the new session
-        // and redirects the user correctly.
-        router.refresh(); 
+        // Redirect based on role
+        if (result.role === 'admin') {
+          router.push('/admin');
+        } else {
+          router.push('/chat');
+        }
       } else {
         toast({
           variant: "destructive",
