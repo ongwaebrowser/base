@@ -191,8 +191,8 @@ function Chat() {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <div className="flex h-full flex-col">
-          <header className="p-4 flex justify-between items-center border-b">
+        <div className="flex h-svh flex-col">
+          <header className="p-4 flex justify-between items-center border-b shrink-0">
             <SidebarTrigger className="md:hidden">
               <PanelLeft />
             </SidebarTrigger>
@@ -237,7 +237,7 @@ function Chat() {
               onDeleteMessage={handleDeleteMessage}
             />
           </div>
-          <div className="w-full p-4 md:p-6 border-t">
+          <div className="w-full p-4 md:p-6 border-t shrink-0">
             <ChatInput onSubmit={handleFormSubmit} isLoading={isPending} />
           </div>
         </div>
