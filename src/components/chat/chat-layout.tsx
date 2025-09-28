@@ -13,6 +13,8 @@ import {
   SidebarMenuButton,
   SidebarInset,
   useSidebar,
+  SidebarFooter,
+  SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { ChatMessages } from '@/components/chat/chat-messages';
 import { ChatInput } from '@/components/chat/chat-input';
@@ -20,8 +22,9 @@ import { sendMessage } from '@/app/actions';
 import type { Message } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/logo';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, LogIn, UserPlus, Shield } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import Link from 'next/link';
 
 const initialState: Message[] = [
   {
@@ -57,7 +60,7 @@ function Chat() {
       } else {
         toast({
           title: 'Error',
-          description: "Something went wrong.",
+          description: 'Something went wrong.',
           variant: 'destructive',
         });
         setMessages((prev) => prev.slice(0, -1));
@@ -85,6 +88,35 @@ function Chat() {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
+        <SidebarFooter>
+          <SidebarSeparator />
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <Link href="#" passHref>
+                <SidebarMenuButton>
+                  <LogIn />
+                  <span>Login</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <Link href="#" passHref>
+                <SidebarMenuButton>
+                  <UserPlus />
+                  <span>Sign Up</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <Link href="#" passHref>
+                <SidebarMenuButton>
+                  <Shield />
+                  <span>Admin Login</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
       </Sidebar>
       <SidebarInset>
         <div className="flex h-full flex-col">
