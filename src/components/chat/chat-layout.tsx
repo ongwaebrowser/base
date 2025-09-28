@@ -22,9 +22,10 @@ import { sendMessage } from '@/app/actions';
 import type { Message } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/logo';
-import { PlusCircle, LogIn, UserPlus, Shield } from 'lucide-react';
+import { PlusCircle, LogIn, UserPlus, Shield, PanelLeft } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import Link from 'next/link';
+import { ThemeToggle } from '../theme-toggle';
 
 const initialState: Message[] = [
   {
@@ -76,7 +77,6 @@ function Chat() {
             <Logo />
             <span className="text-lg font-semibold">OngwaeGPT</span>
           </div>
-          <SidebarTrigger />
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
@@ -120,10 +120,24 @@ function Chat() {
       </Sidebar>
       <SidebarInset>
         <div className="flex h-full flex-col">
+          <header className="p-4 flex justify-between items-center border-b">
+            <SidebarTrigger className="md:hidden">
+              <PanelLeft />
+            </SidebarTrigger>
+            <div className="flex-1 text-center">
+              <h1 className="text-2xl font-bold text-primary">OngwaeGPT</h1>
+              <p className="text-sm text-muted-foreground">
+                By Josephat Ongwae Onyinkwa
+              </p>
+            </div>
+            <div className="w-8">
+               <ThemeToggle />
+            </div>
+          </header>
           <div className="flex-1 overflow-y-auto">
             <ChatMessages messages={messages} isLoading={isPending} />
           </div>
-          <div className="w-full p-4 md:p-6">
+          <div className="w-full p-4 md:p-6 border-t">
             <ChatInput onSubmit={handleFormSubmit} isLoading={isPending} />
           </div>
         </div>
