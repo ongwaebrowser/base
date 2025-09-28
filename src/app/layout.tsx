@@ -7,7 +7,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'OngwaeGPT Chat',
+  title: 'OngwaeGPT',
   description: 'An AI chat assistant by Josephat Ongwae Onyinkwa.',
 };
 

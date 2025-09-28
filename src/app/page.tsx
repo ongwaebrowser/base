@@ -1,5 +1,5 @@
 import { ChatLayout } from '@/components/chat/chat-layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
 
@@ -27,10 +27,10 @@ export default function Home() {
       </main>
       <footer className="p-4 text-center text-xs text-muted-foreground">
         <div className="flex justify-center gap-4">
-          <Link href="#" className="hover:underline">
+          <Link href="/terms" className="hover:underline">
             Terms of Service
           </Link>
-          <Link href="#" className="hover:underline">
+          <Link href="/privacy" className="hover:underline">
             Privacy Policy
           </Link>
         </div>
