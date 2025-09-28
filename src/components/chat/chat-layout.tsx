@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { nanoid } from 'nanoid';
-import { useFormState } from 'react-dom';
 import {
   SidebarProvider,
   Sidebar,
@@ -13,6 +12,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarInset,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { ChatMessages } from '@/components/chat/chat-messages';
 import { ChatInput } from '@/components/chat/chat-input';
@@ -31,7 +31,7 @@ const initialState: Message[] = [
   },
 ];
 
-export function ChatLayout() {
+function Chat() {
   const [messages, setMessages] = React.useState<Message[]>(initialState);
   const [isPending, startTransition] = React.useTransition();
   const { toast } = useToast();
@@ -57,7 +57,7 @@ export function ChatLayout() {
       } else {
         toast({
           title: 'Error',
-          description: result.error,
+          description: "Something went wrong.",
           variant: 'destructive',
         });
         setMessages((prev) => prev.slice(0, -1));
@@ -66,7 +66,7 @@ export function ChatLayout() {
   };
 
   return (
-    <SidebarProvider>
+    <>
       <Sidebar>
         <SidebarHeader className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
@@ -96,6 +96,14 @@ export function ChatLayout() {
           </div>
         </div>
       </SidebarInset>
+    </>
+  );
+}
+
+export function ChatLayout() {
+  return (
+    <SidebarProvider>
+      <Chat />
     </SidebarProvider>
   );
 }
