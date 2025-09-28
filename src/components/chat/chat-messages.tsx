@@ -26,7 +26,7 @@ export function ChatMessages({ messages, isLoading, onDeleteMessage }: ChatMessa
 
   return (
     <div ref={scrollableContainerRef} className="h-full space-y-6 overflow-y-auto px-4 py-6">
-      {messages.map((message, index) => (
+      {messages.map((message) => (
         <motion.div
           key={message.id}
           initial={{ opacity: 0, y: 20 }}
@@ -61,7 +61,7 @@ export function ChatMessages({ messages, isLoading, onDeleteMessage }: ChatMessa
             )}
         </motion.div>
       ))}
-      {isLoading && messages.length > 0 && messages[messages.length - 1].role === 'user' && (
+      {isLoading && messages[messages.length - 1]?.role === 'user' && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
