@@ -11,8 +11,8 @@ export default function Home() {
           By Josephat Ongwae Onyinkwa
         </p>
       </header>
-      <main className="flex flex-1 flex-col items-center justify-center p-4">
-        <Card className="w-full max-w-4xl h-[70vh] shadow-lg">
+      <main className="flex flex-1 flex-col items-center p-4 md:justify-center">
+        <Card className="w-full max-w-4xl flex-1 md:flex-initial md:h-[70vh] shadow-lg">
           <CardContent className="p-0 h-full">
             <ChatLayout />
           </CardContent>
