@@ -5,14 +5,16 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import type { Message } from '@/lib/types';
 import { ChatAvatar } from './chat-avatar';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Trash } from 'lucide-react';
+import { Button } from '../ui/button';
 
 interface ChatMessagesProps {
   messages: Message[];
   isLoading: boolean;
+  onDeleteMessage: (id: string) => void;
 }
 
-export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
+export function ChatMessages({ messages, isLoading, onDeleteMessage }: ChatMessagesProps) {
   const scrollableContainerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -31,7 +33,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className={cn(
-            'flex items-start gap-4',
+            'group flex items-start gap-4',
             message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
           )}
         >
@@ -46,9 +48,20 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
           >
             <p className="whitespace-pre-wrap">{message.content}</p>
           </div>
+           {message.role === 'user' && (
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-6 w-6 opacity-0 group-hover:opacity-100"
+                onClick={() => onDeleteMessage(message.id)}
+              >
+                <Trash className="h-4 w-4" />
+                <span className="sr-only">Delete message</span>
+              </Button>
+            )}
         </motion.div>
       ))}
-      {isLoading && (
+      {isLoading && messages.length > 0 && messages[messages.length - 1].role === 'user' && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -60,6 +73,11 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         </motion.div>
+      )}
+       {isLoading && messages.length === 0 && (
+         <div className="flex justify-center items-center h-full">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+         </div>
       )}
     </div>
   );
